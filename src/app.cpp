@@ -21,13 +21,13 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     _background->stage();
 
     // Create and add a cube to the render pipeline, and stage it for rendering.
-    auto cube = std::make_shared<lithium::Object>(AssetFactory::getMeshes()->cube,
-        std::vector<lithium::Object::TexturePointer>{AssetFactory::getTextures()->logoDiffuse});
-    cube->setPosition(glm::vec3{0.0f});
-    cube->setScale(1.0f);
-    _pipeline->attach(cube.get());
-    _objects.push_back(cube);
-    cube->stage();
+    auto card = std::make_shared<lithium::Object>(AssetFactory::getMeshes()->card,
+        std::vector<lithium::Object::TexturePointer>{AssetFactory::getTextures()->card});
+    card->setPosition(glm::vec3{0.0f});
+    card->setScale(1.0f);
+    _pipeline->attach(card.get());
+    _objects.push_back(card);
+    card->stage();
 
     // Key cache for rotating the camera left and right.
     _keyCache = std::make_shared<lithium::Input::KeyCache>(
@@ -41,7 +41,7 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     });
 
     // Set the camera oirigin position and target.
-    _pipeline->camera()->setPosition(glm::vec3{3.0f, 3.0f, 3.0f});
+    _pipeline->camera()->setPosition(glm::vec3{0.0f, 0.0f, 3.0f});
     _pipeline->camera()->setTarget(glm::vec3{0.0f});
 
     printf("%s\n", glGetString(GL_VERSION));
@@ -57,11 +57,11 @@ App::~App() noexcept
 void App::update(float dt)
 {
     // Apply a rotation to the cube.
-    for(auto o : _objects)
+    /*for(auto o : _objects)
     {
         o->update(dt);
-        o->setRotation(o->rotation() + glm::vec3{8.0f * dt});
-    }
+        o->setRotation(glm::vec3{0.0f, 8.0f * sin(time()), 0.0f});
+    }*/
 
     // Rotate the camera around the origin on player input.
     if(_keyCache->isPressed(GLFW_KEY_LEFT))

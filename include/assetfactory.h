@@ -12,13 +12,14 @@ class AssetFactory
 public:
     struct Meshes
     {
-        std::shared_ptr<lithium::Mesh> cube;
+        std::shared_ptr<lithium::Mesh> card;
         std::shared_ptr<lithium::Mesh> screen;
     } _meshes;
 
     struct Textures
     {
         std::shared_ptr<lithium::ImageTexture> logoDiffuse;
+        std::shared_ptr<lithium::ImageTexture> card;
     } _textures;
 
     struct Objects
