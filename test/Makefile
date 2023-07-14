@@ -1,5 +1,5 @@
-TESTGAME_SOURCES = testgame.cpp ../src/game.cpp ../src/tile.cpp ../src/client.cpp ../src/ievent.cpp
-TESTGAME_INCLUDES = ../include/*.h ../test/*.h
+TESTGAME_SOURCES = testgame.cpp ../src/game.cpp ../src/tile.cpp ../src/client.cpp ../src/ievent.cpp ../src/goptions.cpp
+TESTGAME_INCLUDES = ../include/*.h
 
 testgame: $(TESTGAME_SOURCES) $(TESTGAME_INCLUDES)
 	g++ -std=c++17 $(TESTGAME_SOURCES) -I ../include -I . -o $@ && ./testgame

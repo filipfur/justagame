@@ -1,6 +1,7 @@
 #include "ievent.h"
 
 #include <iostream>
+#include <cstring>
 
 IEvent::IEvent(IO* io) : _io{io}
 {

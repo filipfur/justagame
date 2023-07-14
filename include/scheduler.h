@@ -7,6 +7,7 @@ class Scheduler
 {
     struct Delay
     {
+        uint64_t id;
         std::function<bool(Scheduler*)> callback;
         float delay;
         float remaining;
@@ -44,16 +45,27 @@ public:
         }
     }
 
-    void startDelayed(std::function<bool(Scheduler*)> callback, float delay)
+    uint64_t startDelayed(std::function<bool(Scheduler*)> callback, float delay)
     {
         Delay d;
+        d.id = _nextId++;
         d.callback = callback;
         d.delay = delay;
         d.remaining = delay;
         _delayed.push_back(d);
+        return d.id;
+    }
+
+    void stopDelayed(uint64_t id)
+    {
+        std::remove_if(_delayed.begin(), _delayed.end(), [id](const Delay& d) -> bool
+        {
+            return d.id == id;
+        });
     }
 
 private:
     float _time{0.0f};
     std::vector<Delay> _delayed;
+    uint64_t _nextId{0};
 };

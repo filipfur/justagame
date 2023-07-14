@@ -3,6 +3,7 @@
 #include <vector>
 #include <mutex>
 #include <condition_variable>
+#include <cstring>
 
 class IO
 {

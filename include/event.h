@@ -10,13 +10,17 @@ namespace Event
         NONE,
         SETTINGS,
         JOIN,
-        IDENTITY,
+        GAME_INFO,
         LEAVE,
         READY,
         START,
+
         CARD,
         START_TURN,
         TURN_OVER,
+
+        PLAY_CARD,
+
         EXIT
     };
 
@@ -56,14 +60,7 @@ namespace Event
 
     struct PlayCard
     {
-        uint8_t clientId;
         uint8_t cardId;
-    };
-
-    struct Build
-    {
-        uint8_t clientId;
-        uint8_t buildingType;
         i8vec2 position;
     };
 
@@ -78,15 +75,16 @@ namespace Event
         int32_t knowledge;
     };
 
-    struct Identity
+    struct GameInfo
     {
         uint8_t clientId;
-    };
-
-    struct Start
-    {
         Settings settings;
         i8vec2 position;
+    };
+
+    struct StartTurn
+    {
+        uint32_t turnId;
     };
 
     struct Card
