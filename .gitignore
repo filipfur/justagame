@@ -2,3 +2,5 @@ build/
 cmake_build/
 .vscode/
 .DS_Store
+testgame
+testio
