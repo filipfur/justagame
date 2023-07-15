@@ -28,6 +28,7 @@ public:
             it->remaining -= dt;
             if(it->remaining <= 0.0f)
             {
+                assert(it->callback);
                 if(it->callback(this) == false)
                 {
                     it = _delayed.erase(it);
@@ -58,10 +59,19 @@ public:
 
     void stopDelayed(uint64_t id)
     {
-        std::remove_if(_delayed.begin(), _delayed.end(), [id](const Delay& d) -> bool
+        auto it = _delayed.begin();
+        while(it != _delayed.end())
         {
-            return d.id == id;
-        });
+            if(it->id == id)
+            {
+                it = _delayed.erase(it);
+                break;
+            }
+            else
+            {
+                ++it;
+            }
+        }
     }
 
 private:

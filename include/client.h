@@ -2,6 +2,8 @@
 
 #include "ievent.h"
 #include "scheduler.h"
+#include "player.h"
+#include "goptions.h"
 
 class Client : public IEvent, public Scheduler
 {
@@ -21,7 +23,7 @@ public:
     void handleGameInfo(Event::GameInfo* start);
     void handleStart();
     void handleExit(Event::Exit* exit);
-    void handleCard(Event::Card* card);
+    void handleTakeCards(Event::TakeCards* takeCards);
     void handleStartTurn(Event::StartTurn* startTurn);
     void handleTurnOver();
 
@@ -46,7 +48,13 @@ public:
         return _turnId;
     }
 
+    Player* player()
+    {
+        return &_player;
+    }
+
 private:
+    Player _player;
     Event::GameInfo _gameInfo;
     State _state{State::WAITING_FOR_GAME_INFO};
     uint32_t _turnId{0};

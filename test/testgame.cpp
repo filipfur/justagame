@@ -26,20 +26,47 @@ int main(int argc, const char* argv[])
     TestController clientAController{&clientA};
     TestController clientBController{&clientB};
 
-    clientAController.setOnNewTurnCallback([](TestController* controller, uint32_t turnId) {
+    const auto playRandomCard = [](Scheduler* scheduler) {
+        auto controller = dynamic_cast<ClientController*>(scheduler);
+        Player* player = controller->client()->player();
+        Event::PlayCard playCard;
+        playCard.cardId = player->cardByIndex((rand() % 20) % player->cardCount()).cardId;
+        playCard.position.x = rand() % 20;
+        playCard.position.y = rand() % 20;
+        controller->client()->pushEvent(Event::PLAY_CARD, &playCard);
+        return false;
+    };
+
+    const auto passTurn = [](Scheduler* scheduler) {
+        auto controller = dynamic_cast<ClientController*>(scheduler);
+        controller->client()->pushEvent(Event::PASS, nullptr);
+        return false;
+    };
+
+    clientAController.setOnNewTurnCallback([&playRandomCard, &passTurn](TestController* controller, uint32_t turnId) {
         std::cout << "Client A turn: " << turnId << std::endl;
         switch(turnId)
         {
             case 0:
-                controller->startDelayed([](Scheduler* scheduler) {
-                    auto controller = dynamic_cast<ClientController*>(scheduler);
-                    Event::PlayCard playCard;
-                    playCard.cardId = rand() % 10;
-                    playCard.position.x = rand() % 20;
-                    playCard.position.y = rand() % 20;
-                    controller->client()->pushEvent(Event::PLAY_CARD, &playCard);
-                    return false;
-                }, 2.0f);
+                controller->startDelayed(playRandomCard, 2.0f);
+                break;
+            case 2:
+                controller->startDelayed(playRandomCard, 4.0f);
+                controller->startDelayed(passTurn, 5.0f);
+                break;
+        }
+    });
+
+    clientBController.setOnNewTurnCallback([&playRandomCard, &passTurn](TestController* controller, uint32_t turnId) {
+        std::cout << "Client B turn: " << turnId << std::endl;
+        switch(turnId)
+        {
+            case 1:
+                controller->startDelayed(playRandomCard, 4.0f);
+                controller->startDelayed(passTurn, 6.0f);
+                break;
+            case 3:
+                controller->startDelayed(passTurn, 2.0f);
                 break;
         }
     });
@@ -77,7 +104,7 @@ int main(int argc, const char* argv[])
 
     float multiplier{4.0f};
     float dt{10.0f * multiplier * 1e-3f};
-    for(int i{0}; i < 500; ++i)
+    for(int i{0}; i < 1000; ++i)
     {
         try
         {

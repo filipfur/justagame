@@ -32,6 +32,11 @@ void Client::handleGameInfo(Event::GameInfo* gameInfo)
         }
         return _state != State::GAME_STARTED;
     }, 0.2f);
+    for(int i{0}; i < goptions::startNumberOfCards; ++i)
+    {
+        printf("Card: cardId=%d, cardType=%d\n", gameInfo->cards[i].cardId, gameInfo->cards[i].cardType);
+        _player.addCard(gameInfo->cards[i]);
+    }
 }
 
 void Client::handleExit(Event::Exit* exit)
@@ -51,9 +56,14 @@ void Client::handleStart()
     _state = State::GAME_STARTED;
 }
 
-void Client::handleCard(Event::Card* card)
+void Client::handleTakeCards(Event::TakeCards* takeCards)
 {
-    LOG("Card: id=%d type=%d", card->cardId, card->cardType);
+    LOG("TakeCards: numberOfCards=%d", takeCards->numberOfCards);
+    for(int i{0}; i < takeCards->numberOfCards; ++i)
+    {
+        printf("Card: cardId=%d, cardType=%d\n", takeCards->cards[i].cardId, takeCards->cards[i].cardType);
+        _player.addCard(takeCards->cards[i]);
+    }
 }
 
 void Client::handleStartTurn(Event::StartTurn* startTurn)
@@ -82,8 +92,8 @@ void Client::handleEvents()
             case Event::START:
                 handleStart();
                 break;
-            case Event::CARD:
-                handleCard((Event::Card*)header.data);
+            case Event::TAKE_CARDS:
+                handleTakeCards((Event::TakeCards*)header.data);
                 break;
             case Event::START_TURN:
                 handleStartTurn((Event::StartTurn*)header.data);

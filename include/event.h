@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <assert.h>
+#include "goptions.h"
 
 namespace Event
 {
@@ -15,8 +16,9 @@ namespace Event
         READY,
         START,
 
-        CARD,
+        TAKE_CARDS,
         START_TURN,
+        PASS,
         TURN_OVER,
 
         PLAY_CARD,
@@ -35,6 +37,12 @@ namespace Event
     {
         uint8_t x;
         uint8_t y;
+    };
+
+    struct Card
+    {
+        uint8_t cardId;
+        uint8_t cardType;
     };
 
     struct Settings
@@ -80,6 +88,7 @@ namespace Event
         uint8_t clientId;
         Settings settings;
         i8vec2 position;
+        Card cards[goptions::startNumberOfCards];
     };
 
     struct StartTurn
@@ -87,10 +96,10 @@ namespace Event
         uint32_t turnId;
     };
 
-    struct Card
+    struct TakeCards
     {
-        uint8_t cardId;
-        uint8_t cardType;
+        uint8_t numberOfCards;
+        Card cards[8];
     };
 
     struct Exit

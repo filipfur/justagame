@@ -51,6 +51,10 @@ void Game::handleJoin(uint8_t clientId, Event::Join* join)
     };
     gameInfo.clientId = clientId;
     gameInfo.position = startPos[clientId];
+    for(int i{0}; i < goptions::startNumberOfCards; ++i)
+    {
+        gameInfo.cards[i] = _players.at(clientId).spawnCard();
+    }
     _clients.at(clientId)->pushEvent(Event::GAME_INFO, &gameInfo);
     ++_joined;
 }
@@ -93,29 +97,40 @@ void Game::handlePlayCard(uint8_t clientId, Event::PlayCard* playCard)
         return;
     }
 
-    if(_cards.find(playCard->cardId) == _cards.end()) // Card map should be per client along with other values, oil, cash, etc, etc.
+    if(!playerInTurn()->hasCard(playCard->cardId)) // Card map should be per client along with other values, oil, cash, etc, etc.
     {
         printf("Warning: Unknown card: %d\n", playCard->cardId);
         return;
     }
 }
 
-Event::Card Game::spawnCard()
+void Game::handlePass(uint8_t clientId)
 {
-    static int nextCardId{0};
-    Event::Card card;
-    card.cardId = nextCardId++;
-    card.cardType = rand() % 10;
-    _cards[card.cardId] = card;
-    return card;
+    LOG("Pass: %d", clientId);
+    if(_state != State::GAME_STARTED)
+    {
+        printf("Warning: Wrong state: %d\n", static_cast<int>(_state));
+        return;
+    }
+
+    if(clientId != _turnId % _settings.numberOfPlayers)
+    {
+        printf("Warning: Wrong turn: %d\n", clientId);
+        return;
+    }
+
+    stopDelayed(_turnOverId);
+    endTurn();
 }
 
 void Game::startTurn()
 {
     startDelayed([this](Scheduler* scheduler) -> bool
     {
-        Event::Card card = spawnCard();
-        clientInTurn()->pushEvent(Event::CARD, &card);
+        Event::TakeCards takeCards;
+        takeCards.cards[0] = playerInTurn()->spawnCard();
+        takeCards.numberOfCards = 1;
+        clientInTurn()->pushEvent(Event::TAKE_CARDS, &takeCards);
         return false;
     }, 0.1f);
 
@@ -129,8 +144,15 @@ void Game::startTurn()
     _turnOverId = startDelayed([this](Scheduler* scheduler) -> bool
     {
         clientInTurn()->pushEvent(Event::TURN_OVER, nullptr);
+        endTurn();
         return false;
     }, goptions::cardToStartTurnDelay + goptions::turnTime);
+}
+
+void Game::endTurn()
+{
+    ++_turnId;
+    startTurn();
 }
 
 void Game::handleEvents()
@@ -158,6 +180,9 @@ void Game::handleEvents()
             case Event::PLAY_CARD:
                 handlePlayCard(clientId, (Event::PlayCard*)event.data);
                 break;
+            case Event::PASS:
+                handlePass(clientId);
+                break;
             default:
                 throw std::runtime_error("unknown event type: " + std::to_string(event.type));
             }
@@ -175,6 +200,7 @@ void Game::addConnection(IO* io)
     std::shared_ptr<IEvent> clientEvent = std::make_shared<IEvent>(io);
     clientEvent->startPoll();
     _clients.push_back(clientEvent);
+    _players.push_back(Player{});
 }
 
 void Game::exit()

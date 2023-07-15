@@ -7,6 +7,7 @@
 #include "io.h"
 #include "scheduler.h"
 #include "goptions.h"
+#include "player.h"
 
 class Game : public Scheduler
 {
@@ -30,6 +31,7 @@ public:
     void handleLeave(uint8_t clientId, Event::Leave* leave);
     void handleReady(uint8_t clientId);
     void handlePlayCard(uint8_t clientId, Event::PlayCard* playCard);
+    void handlePass(uint8_t clientId);
 
     void exit();
 
@@ -37,11 +39,14 @@ public:
 
     void addConnection(IO* io);
 
-    Event::Card spawnCard();
-
     std::shared_ptr<IEvent> clientInTurn() const
     {
         return _clients.at(_turnId % _settings.numberOfPlayers);
+    }
+
+    std::vector<Player>::iterator playerInTurn()
+    {
+        return _players.begin() + (_turnId % _settings.numberOfPlayers);
     }
 
 private:
@@ -54,14 +59,15 @@ private:
     }
 
     void startTurn();
+    void endTurn();
 
     std::vector<std::shared_ptr<IEvent>> _clients;
+    std::vector<Player> _players;
     std::vector<std::vector<Tile>> _tileMap;
     Event::Settings _settings;
     std::set<int> _ready;
     uint32_t _turnId{0};
     int _joined{0};
     uint64_t _turnOverId;
-    std::map<int, Event::Card> _cards;
     State _state{State::WAITING_FOR_SETTING};
 };
