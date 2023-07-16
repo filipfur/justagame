@@ -14,14 +14,22 @@ file(GLOB SOURCES
 )
 
 add_executable(${CMAKE_PROJECT_NAME} ${SOURCES})
+target_link_libraries(${CMAKE_PROJECT_NAME} lithium)
 
 file(GLOB TEST_SOURCES
     src/game.cpp
-    test/*.cpp)
+    src/client.cpp
+    src/goptions.cpp
+    src/ievent.cpp
+    src/tile.cpp
+    test/testgame.cpp)
 
 add_executable(test_game ${TEST_SOURCES})
 
-target_link_libraries(${CMAKE_PROJECT_NAME} lithium)
+file(GLOB SOURCES cardgen/*.cpp)
+add_executable(cardgen ${SOURCES})
+target_include_directories(cardgen PUBLIC cardgen)
+target_link_libraries(cardgen lithium)
 
 add_subdirectory(lithium)
 

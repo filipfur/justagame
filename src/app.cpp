@@ -72,10 +72,10 @@ void App::update(float dt)
     {
         _cameraAngle += glm::pi<float>() * 0.5f * dt;
     }
-    static const float cameraRadius = 6.0f;
-    float camX = cos(_cameraAngle) * cameraRadius;
-    static const float camY = cameraRadius * 0.5f;
-    float camZ = sin(_cameraAngle) * cameraRadius;
+    static const float cameraRadius = 1.6f;
+    float camX = sin(_cameraAngle) * cameraRadius;
+    static const float camY = cameraRadius * 0.3f;
+    float camZ = cos(_cameraAngle) * cameraRadius;
     _pipeline->camera()->setPosition(glm::vec3{camX, camY, camZ});
     _pipeline->render();
 }

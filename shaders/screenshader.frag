@@ -7,5 +7,5 @@ uniform sampler2D u_texture;
 
 void main()
 {
-    fragColor = vec4(mix(vec3(1.0, 1.0, 1.0) * 1.0, vec3(0.5, 0.75, 1.0) * 0.7, (texCoord.y) * 0.75 - 0.25), 1.0);
+    fragColor = vec4(vec3(pow(texCoord.y, 1.0 / 4.0) * 0.8), 1.0);
 }

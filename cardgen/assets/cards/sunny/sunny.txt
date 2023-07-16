@@ -1,0 +1,4 @@
+@title Forecast: Heat Wave
+Weather conditions are
+extremely sunny.
+Solar panels are 2x effective.
