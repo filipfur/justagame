@@ -49,23 +49,9 @@ void parseLabel(std::ifstream& ifs, Card& card, const std::string& label)
     }
 }
 
-void CardGen::loadCard(const std::filesystem::path& directory)
+void CardGen::parseCardFile(const std::filesystem::path& filename, Card& card)
 {
-    std::string name = directory.filename().string();
-    std::filesystem::path textureFile = directory / (name + ".png");
-
-    Card card;
-
-    if(std::filesystem::exists(textureFile))
-    {
-        card.texture.reset((lithium::ImageTexture*)lithium::ImageTexture::load(textureFile.string(), GL_RGBA, GL_RGBA, 1, true));
-    }
-    else
-    {
-        card.texture = _defaultTexture;
-    }
-
-    std::ifstream ifs{directory / (name + ".txt")};
+    std::ifstream ifs{filename};
     std::string line;
     
     char c = ifs.peek();
@@ -85,8 +71,47 @@ void CardGen::loadCard(const std::filesystem::path& directory)
         }
         c = ifs.peek();
     }
-    
+}
+
+void CardGen::loadCard(const std::filesystem::path& directory)
+{
+    std::string name = directory.filename().string();
+    std::filesystem::path textureFile = directory / (name + ".png");
+
+    Card card;
+
+    if(std::filesystem::exists(textureFile))
+    {
+        card.texture.reset((lithium::ImageTexture*)lithium::ImageTexture::load(textureFile.string(), GL_RGBA, GL_RGBA, 1, true));
+        //card.texture->watch();
+    }
+    else
+    {
+        card.texture = _defaultTexture;
+    }
+
+    const auto cardFile = directory / (name + ".txt");
+    card.path = cardFile;
+    parseCardFile(cardFile, card);
+
     _cards.push_back(card);
+
+    lithium::FileWatch::start(cardFile, [this](const std::filesystem::path& path){
+        for(auto it = _cards.begin(); it != _cards.end(); ++it)
+        {
+            if(it->path == path)
+            {
+                it->body = "";
+                parseCardFile(path, *it);
+                if(_cardIt == it)
+                {
+                    updateCard();
+                }
+                break;
+            }
+        }
+    });
+
 }
 
 void CardGen::updateCard()

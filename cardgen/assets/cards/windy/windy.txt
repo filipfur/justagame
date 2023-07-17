@@ -1,2 +1,5 @@
-Whoa! There's alot of wind
+@title Forecast: Windy
+Whoa! There's alot of wind,
 let me tell ya!
+Wind turbines are generating
+twice as much energy.

@@ -1,6 +1,6 @@
 @title Blueprints: Nuclear Plant
-Use this card to build a nuclear
-plant. Must be placed
-at a power grid.
+Use this card to build a
+nuclear plant. This building 
+must be placed in a power grid.
 
-Bad effect: Lose one reputation.
+Bad effect: Lose one reputation

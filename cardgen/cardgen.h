@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <filesystem>
+#include "glfilewatch.h"
 #include "glapplication.h"
 #include "glmesh.h"
 #include "glcanvas.h"
@@ -28,6 +29,7 @@ public:
     
     void loadCards();
     void loadCard(const std::filesystem::path& filename);
+    void parseCardFile(const std::filesystem::path& filename, Card& card);
 
     void updateCard();
 
@@ -41,4 +43,5 @@ private:
     std::vector<Card> _cards;
     std::vector<Card>::iterator _cardIt;
     std::shared_ptr<lithium::ImageTexture> _defaultTexture;
+    std::vector<lithium::FileWatch> _cardFileWatches;
 };
