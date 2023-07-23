@@ -2,6 +2,8 @@
 
 #include "assetfactory.h"
 
+#include "glcube.h"
+
 App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Application::Mode::MULTISAMPLED_4X, false}
 {
     // Load all assets from the filesystem.
@@ -29,9 +31,22 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     _objects.push_back(card);
     card->stage();
 
+    _skybox = std::shared_ptr<lithium::Object>(new lithium::Object(std::shared_ptr<lithium::Mesh>(lithium::InvCube()), {
+        AssetFactory::getTextures()->skybox}));
+    _skybox->setGroupId(Pipeline::SKYBOX);
+
+    _pipeline->attach(_skybox.get());
+    _skybox->stage();
+
+    for(auto o : AssetFactory::getObjects()->windTurbine)
+    {
+        _pipeline->attach(o.get());
+        o->stage();
+    }
+
     // Key cache for rotating the camera left and right.
     _keyCache = std::make_shared<lithium::Input::KeyCache>(
-        std::initializer_list<int>{GLFW_KEY_LEFT, GLFW_KEY_RIGHT});
+        std::initializer_list<int>{GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_UP, GLFW_KEY_DOWN});
     input()->setKeyCache(_keyCache);
 
     // Escape key to close the application.
@@ -39,6 +54,8 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
         this->close();
         return true;
     });
+
+    setMaxFps(60.0f);
 
     // Set the camera oirigin position and target.
     _pipeline->camera()->setPosition(glm::vec3{0.0f, 0.0f, 3.0f});
@@ -72,11 +89,18 @@ void App::update(float dt)
     {
         _cameraAngle += glm::pi<float>() * 0.5f * dt;
     }
-    static const float cameraRadius = 1.6f;
+    if(_keyCache->isPressed(GLFW_KEY_UP))
+    {
+        _camY += 5.0f * dt;
+    }
+    else if(_keyCache->isPressed(GLFW_KEY_DOWN))
+    {
+        _camY -= 5.0f * dt;
+    }
+    static const float cameraRadius = 14.0f;
     float camX = sin(_cameraAngle) * cameraRadius;
-    static const float camY = cameraRadius * 0.3f;
     float camZ = cos(_cameraAngle) * cameraRadius;
-    _pipeline->camera()->setPosition(glm::vec3{camX, camY, camZ});
+    _pipeline->camera()->setPosition(glm::vec3{camX, _camY, camZ});
     _pipeline->render();
 }
 

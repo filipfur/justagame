@@ -35,11 +35,21 @@ void AssetFactory::loadTextures()
     AssetFactory& instance = getInstance();
     instance._textures.logoDiffuse.reset((lithium::ImageTexture*)lithium::ImageTexture::load("assets/Kraxbox_logo_lithium_metal_2ff2069c-b84a-426c-bf92-e9831105a5df.png", GL_SRGB_ALPHA, GL_RGBA)->setFilter(GL_NEAREST));
     instance._textures.card.reset((lithium::ImageTexture*)lithium::ImageTexture::load("assets/card/test.png", GL_SRGB_ALPHA, GL_RGBA)->setFilter(GL_LINEAR));
+    instance._textures.skybox = lithium::Cubemap::load({
+        "assets/skybox_/right.jpg",
+        "assets/skybox_/left.jpg",
+        "assets/skybox_/top.jpg",
+        "assets/skybox_/bottom.jpg",
+        "assets/skybox_/front.jpg",
+        "assets/skybox_/back.jpg"
+    });
+    instance._textures.skybox->setFilter(GL_LINEAR);
 }
 
 void AssetFactory::loadObjects()
 {
     AssetFactory& instance = getInstance();
+    instance._gltfLoader.loadObjects(instance._objects.windTurbine, "assets/windturbine/windturbine.gltf");
 }
 
 void AssetFactory::loadFonts()

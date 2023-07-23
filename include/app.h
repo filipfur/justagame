@@ -23,8 +23,10 @@ protected:
 
 private:
     std::shared_ptr<Pipeline> _pipeline{nullptr};
+    std::shared_ptr<lithium::Object> _skybox{nullptr};
     std::vector<std::shared_ptr<lithium::Object>> _objects;
     std::shared_ptr<lithium::Object> _background;
     float _cameraAngle{0.0f};
+    float _camY{0.0f};
     std::shared_ptr<lithium::Input::KeyCache> _keyCache;
 };

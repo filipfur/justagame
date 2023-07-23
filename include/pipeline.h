@@ -4,6 +4,7 @@
 #include "glsimplecamera.h"
 #include "glrenderpipeline.h"
 #include "glframebuffer.h"
+#include "gluniformbufferobject.h"
 
 class Pipeline : public lithium::RenderPipeline
 {
@@ -11,7 +12,8 @@ public:
     enum Group
     {
         DEFAULT,
-        BACKGROUND
+        BACKGROUND,
+        SKYBOX
     };
 
     Pipeline(const glm::ivec2& resolution);
@@ -30,10 +32,14 @@ private:
     std::shared_ptr<lithium::ShaderProgram> _blockShader{nullptr};
     std::shared_ptr<lithium::ShaderProgram> _msaaShader{nullptr};
     std::shared_ptr<lithium::ShaderProgram> _screenShader{nullptr};
+    std::shared_ptr<lithium::ShaderProgram> _skyboxShader{nullptr};
+    std::shared_ptr<lithium::ShaderProgram> _pbrShader{nullptr};
     std::shared_ptr<lithium::SimpleCamera> _camera{nullptr};
 
     /*Render groups*/
     std::shared_ptr<lithium::RenderGroup> _screenGroup;
+    std::shared_ptr<lithium::RenderGroup> _skyboxGroup;
+    std::shared_ptr<lithium::RenderGroup> _pbrGroup;
     std::shared_ptr<lithium::RenderGroup> _mainGroup;
 
     /*Render stages*/
@@ -42,6 +48,7 @@ private:
 
     /* Framebuffers */
     std::shared_ptr<lithium::FrameBuffer> _frameBuffer;
+    std::shared_ptr<lithium::UniformBufferObject> _cameraUBO;
     
     /* Meshes */
     std::shared_ptr<lithium::Mesh> _screenMesh;
