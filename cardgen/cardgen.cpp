@@ -5,6 +5,7 @@
 
 #include "glplane.h"
 #include "utility.h"
+#include "glcolor.h"
 
 void CardGen::generateImage()
 {
@@ -122,7 +123,7 @@ void CardGen::updateCard()
     auto titleFrame = _canvas->frameById("canvas.0.1");
     titleFrame->text()->setText(_cardIt->title);
 
-    auto bodyFrame = _canvas->frameById("canvas.0.2");
+    auto bodyFrame = _canvas->frameById("body");
     bodyFrame->text()->setText(_cardIt->body);
 
     imageFrame->refresh();
@@ -186,19 +187,35 @@ CardGen::CardGen() : lithium::Application{"lithium-lab", glm::ivec2{1920, 1080},
 
     auto titleFrame = _canvas->frameById("canvas.0.1");
     titleFrame->setColor(glm::vec3{0.2f});
-    //titleFrame->setTextures(std::vector<lithium::Object::TexturePointer>{bannerTexture});
 
     auto myText = titleFrame->createTextRenderer()->createText(_font, _cardIt->title, 1.4f, lithium::Text::Alignment::CENTER, 1.0f, 1.05f);
-    //myText->setPosition(glm::vec3{-myText->width() * 0.5f, -myText->height() * 0.3f, 0.0f}); // 0.3 hack!
-    myText->setPosition(glm::vec3{0.0f, 16.0f, 0.0f});
-    myText->setScale(1.0f);
-    auto bodyFrame = _canvas->frameById("canvas.0.2");
+    auto bodyFrame = _canvas->frameById("body");
     bodyFrame->setColor(glm::vec3{0.1});
 
     auto bodyText = bodyFrame->createTextRenderer()->createText(_font, _cardIt->body, 1.1f, lithium::Text::Alignment::CENTER, 1.0f, 1.05f);
-    bodyText->setPosition(glm::vec3{0.0f, 12.0f, 0.0f});
-    //bodyText->setMaxLineWidth(500.0f);
-    //bodyText->setPosition(glm::vec3{-bodyText->width() * 0.5f, 0.0f/*bodyText->height() * 0.5f*/, 0.0f});
+
+
+
+    auto slot0Text = _canvas->frameById("slots.0.0");
+    slot0Text->setColor(lithium::black);
+    slot0Text->setOpacity(0.0f);
+    slot0Text->createTextRenderer()->createText(_font, "1", 1.0f, lithium::Text::Alignment::CENTER, 1.0f, 1.05f);
+    auto slot0Img = _canvas->frameById("slots.0");
+    slot0Img->setTextures(std::vector<lithium::Object::TexturePointer>{checkboardTexture});
+
+    //std::shared_ptr<lithium::Frame> slot1 = std::make_shared<lithium::Frame>(slot0Img->layout()->clone());
+    //_canvas->refreshUI();
+
+    auto slots = _canvas->frameById("slots");
+    slots->setColor(glm::vec3{0.1f});
+
+    auto classFrame2 = _canvas->frameById("canvas.1");
+    classFrame2->setColor(glm::vec3{0.2f});
+    classFrame2->child(0)->setTextures(std::vector<lithium::Object::TexturePointer>{_cardIt->texture});
+    classFrame2->child(1)->setColor(glm::vec3{0.2f});
+    classFrame2->child(1)->createTextRenderer()->createText(_font, _cardIt->title, 1.4f, lithium::Text::Alignment::CENTER, 1.0f, 1.05f);
+    classFrame2->child(2)->setColor(glm::vec3{0.1f});
+    classFrame2->child(2)->createTextRenderer()->createText(_font, _cardIt->body, 1.1f, lithium::Text::Alignment::CENTER, 1.0f, 1.05f);
 
     input()->setDragCallback([this](int button, int modifiers, const glm::vec2& start, const glm::vec2& current, const glm::vec2& delta, bool completed) {
         if(button == GLFW_MOUSE_BUTTON_LEFT)

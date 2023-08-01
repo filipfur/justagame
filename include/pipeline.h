@@ -13,7 +13,8 @@ public:
     {
         DEFAULT,
         BACKGROUND,
-        SKYBOX
+        SKYBOX,
+        PBR
     };
 
     Pipeline(const glm::ivec2& resolution);
@@ -34,12 +35,14 @@ private:
     std::shared_ptr<lithium::ShaderProgram> _screenShader{nullptr};
     std::shared_ptr<lithium::ShaderProgram> _skyboxShader{nullptr};
     std::shared_ptr<lithium::ShaderProgram> _pbrShader{nullptr};
+    std::shared_ptr<lithium::ShaderProgram> _pbrBaseColorShader{nullptr};
     std::shared_ptr<lithium::SimpleCamera> _camera{nullptr};
 
     /*Render groups*/
     std::shared_ptr<lithium::RenderGroup> _screenGroup;
     std::shared_ptr<lithium::RenderGroup> _skyboxGroup;
     std::shared_ptr<lithium::RenderGroup> _pbrGroup;
+    std::shared_ptr<lithium::RenderGroup> _pbrBaseColorGroup;
     std::shared_ptr<lithium::RenderGroup> _mainGroup;
 
     /*Render stages*/

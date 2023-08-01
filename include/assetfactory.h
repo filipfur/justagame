@@ -15,6 +15,7 @@ public:
     {
         std::shared_ptr<lithium::Mesh> card;
         std::shared_ptr<lithium::Mesh> screen;
+        std::shared_ptr<lithium::Mesh> sphere;
     } _meshes;
 
     struct Textures
@@ -22,6 +23,7 @@ public:
         std::shared_ptr<lithium::ImageTexture> logoDiffuse;
         std::shared_ptr<lithium::ImageTexture> card;
         std::shared_ptr<lithium::Cubemap> skybox;
+        std::vector<std::shared_ptr<lithium::Texture<unsigned char>>> rustedIron;
     } _textures;
 
     struct Objects

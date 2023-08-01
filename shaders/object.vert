@@ -17,7 +17,7 @@ void main()
 {
     texCoord = aTexCoords;
     mat3 normalMatrix = transpose(inverse(mat3(u_model)));
-    normal = normalize(normalMatrix * aNormal);
+    normal = normalMatrix * aNormal;
     fragPos = vec3(u_model * vec4(aPos, 1.0));
     gl_Position = u_projection * u_view * vec4(fragPos, 1.0);
 }

@@ -77,9 +77,9 @@ namespace Event
     */
     struct PlayerState
     {
-        int32_t oil;
-        int32_t reputation;
         int32_t cash;
+        int32_t energy;
+        int32_t reputation;
         int32_t knowledge;
     };
 

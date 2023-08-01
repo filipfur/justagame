@@ -28,6 +28,7 @@ void AssetFactory::loadMeshes()
     AssetFactory& instance = getInstance();
     instance._meshes.screen.reset(lithium::Plane2D());
     instance._meshes.card = lithium::tinyobjloader_load("assets/card/card.obj", objectAttributes);
+    instance._meshes.sphere = lithium::tinyobjloader_load("assets/sphere.obj", objectAttributes);
 }
 
 void AssetFactory::loadTextures()
@@ -44,6 +45,17 @@ void AssetFactory::loadTextures()
         "assets/skybox_/back.jpg"
     });
     instance._textures.skybox->setFilter(GL_LINEAR);
+
+    instance._textures.rustedIron.push_back(std::shared_ptr<lithium::ImageTexture>(
+        lithium::ImageTexture::load("assets/rustediron1-alt2-bl/rustediron2_basecolor.png", GL_SRGB, GL_RGB)));
+    instance._textures.rustedIron.push_back(std::shared_ptr<lithium::ImageTexture>(
+        lithium::ImageTexture::load("assets/rustediron1-alt2-bl/rustediron2_normal.png", GL_RGB, GL_RGB)));
+    instance._textures.rustedIron.push_back(std::shared_ptr<lithium::ImageTexture>(
+        lithium::ImageTexture::load("assets/rustediron1-alt2-bl/rustediron2_metallic.png", GL_RED, GL_RED)));
+    instance._textures.rustedIron.push_back(std::shared_ptr<lithium::ImageTexture>(
+        lithium::ImageTexture::load("assets/rustediron1-alt2-bl/rustediron2_roughness.png", GL_RED, GL_RED)));
+    instance._textures.rustedIron.push_back(std::shared_ptr<lithium::ImageTexture>(
+        lithium::ImageTexture::load("assets/rustediron1-alt2-bl/rustediron2_ao.png", GL_RGB, GL_RGB)));
 }
 
 void AssetFactory::loadObjects()
