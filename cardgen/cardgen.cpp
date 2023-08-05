@@ -7,9 +7,9 @@
 #include "utility.h"
 #include "glcolor.h"
 
-void CardGen::generateImage()
+void CardGen::generateImage(const std::string& id)
 {
-    lithium::Frame* frame = _canvas->frameById("canvas.0");
+    lithium::Frame* frame = _canvas->frameById(id);
 
     int width  = static_cast<int>(frame->dimension().x);
     int height = static_cast<int>(frame->dimension().y);
@@ -230,7 +230,11 @@ CardGen::CardGen() : lithium::Application{"lithium-lab", glm::ivec2{1920, 1080},
     });
 
     input()->addPressedCallback(GLFW_KEY_F5, [this](int key, int mods) {
-        generateImage();
+        generateImage("canvas.0");
+        return true;
+    });
+    input()->addPressedCallback(GLFW_KEY_F6, [this](int key, int mods) {
+        generateImage("canvas.1");
         return true;
     });
 

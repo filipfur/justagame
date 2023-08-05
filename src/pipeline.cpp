@@ -12,6 +12,7 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
     blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     enableMultisampling();
     enableFaceCulling();
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
     _blockShader = std::make_shared<lithium::ShaderProgram>("shaders/object.vert", "shaders/object.frag");
     _blockShader->setUniform("u_texture_0", 0);
@@ -23,17 +24,31 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
     _pbrShader->setUniform("u_metallic_map", 2);
     _pbrShader->setUniform("u_roughness_map", 3);
     _pbrShader->setUniform("u_ao_map", 4);
+    _pbrShader->setUniform("u_brdf_lut", 7);
     _pbrShader->setUniform("u_irradiance_map", 8);
+    _pbrShader->setUniform("u_prefilter_map", 9);
     _pbrShader->setUniform("u_projection", _camera->projection());
+
+    _pbrPolyHavenShader = std::make_shared<lithium::ShaderProgram>("shaders/object.vert", "shaders/pbrpolyhaven.frag");
+    _pbrPolyHavenShader->setUniform("u_albedo_map", 0);
+    _pbrPolyHavenShader->setUniform("u_normal_map", 1);
+    _pbrPolyHavenShader->setUniform("u_arm_map", 2);
+    _pbrPolyHavenShader->setUniform("u_brdf_lut", 7);
+    _pbrPolyHavenShader->setUniform("u_irradiance_map", 8);
+    _pbrPolyHavenShader->setUniform("u_prefilter_map", 9);
+    _pbrPolyHavenShader->setUniform("u_projection", _camera->projection());
 
     _pbrBaseColorShader = std::make_shared<lithium::ShaderProgram>("shaders/object.vert", "shaders/pbrbasecolor.frag");
     _pbrBaseColorShader->setUniform("u_projection", _camera->projection());
+    _pbrBaseColorShader->setUniform("u_brdf_lut", 7);
     _pbrBaseColorShader->setUniform("u_irradiance_map", 8);
+    _pbrBaseColorShader->setUniform("u_prefilter_map", 9);
 
     _skyboxShader = std::make_shared<lithium::ShaderProgram>("shaders/cubemap.vert", "shaders/cubemap.frag");
     //_skyboxShader->setUniform("u_projection", _camera->projection());
 
     _screenShader = std::make_shared<lithium::ShaderProgram>("shaders/screenshader.vert", "shaders/screenshader.frag");
+    _screenShader->setUniform("u_texture", 7);
     
     _msaaShader = std::make_shared<lithium::ShaderProgram>("shaders/screenshader.vert", "shaders/msaa.frag");
     _msaaShader->setUniform("u_texture", 0);
@@ -68,6 +83,10 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
         return renderable->groupId() == PBR && dynamic_cast<lithium::Object*>(renderable)->hasTexture();
     });
 
+    _pbrPolyHavenGroup = createRenderGroup([this](lithium::Renderable* renderable) -> bool {
+        return renderable->groupId() == PBR_POLY_HAVEN;
+    });
+
     _mainGroup = createRenderGroup([this](lithium::Renderable* renderable) -> bool {
         return dynamic_cast<lithium::Object*>(renderable) && !renderable->hasAttachments();
     });
@@ -77,11 +96,12 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
         _cameraUBO->bufferSubData(sizeof(glm::mat4) * 2, _camera->position());
         clearColor(0.0f, 0.0f, 0.0f, 0.0f);
         clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
         //disableDepthWriting();
         //_screenGroup->render(_screenShader.get());
         //enableDepthWriting();
 
-        //_skyboxShader->setUniform("u_view", glm::mat4(glm::mat3(_camera->view())));
+        _skyboxShader->setUniform("u_view", glm::mat4(glm::mat3(_camera->view())));
         disableDepthWriting();
         _skyboxGroup->render(_skyboxShader);
         enableDepthWriting();
@@ -93,6 +113,10 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
         _pbrBaseColorShader->setUniform("u_view", _camera->view());
         _pbrBaseColorShader->setUniform("u_view_pos", _camera->position());
         _pbrBaseColorGroup->render(_pbrBaseColorShader.get());
+
+        _pbrPolyHavenShader->setUniform("u_view", _camera->view());
+        _pbrPolyHavenShader->setUniform("u_view_pos", _camera->position());
+        _pbrPolyHavenGroup->render(_pbrPolyHavenShader.get());
 
         _blockShader->setUniform("u_view", _camera->view());
         _blockShader->setUniform("u_time", 0.0f);

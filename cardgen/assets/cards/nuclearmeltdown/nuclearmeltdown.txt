@@ -1,5 +1,4 @@
 @title Nuclear Meltdown
-This ought to be good...
 Lose one of your nuclear
 plants and all the buildings
 surrounding it.

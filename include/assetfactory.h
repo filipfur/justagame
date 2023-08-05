@@ -24,11 +24,16 @@ public:
         std::shared_ptr<lithium::ImageTexture> card;
         std::shared_ptr<lithium::Cubemap> skybox;
         std::vector<std::shared_ptr<lithium::Texture<unsigned char>>> rustedIron;
+        std::vector<std::shared_ptr<lithium::Texture<unsigned char>>> scuffedGold;
+        std::vector<std::shared_ptr<lithium::Texture<unsigned char>>> barberChair;
+        std::vector<std::shared_ptr<lithium::Texture<unsigned char>>> chessSet;
     } _textures;
 
     struct Objects
     {
         std::vector<std::shared_ptr<lithium::Object>> windTurbine;
+        std::vector<std::shared_ptr<lithium::Object>> barberChair;
+        std::vector<std::shared_ptr<lithium::Object>> chessSet;
     } _objects;
 
     struct Fonts

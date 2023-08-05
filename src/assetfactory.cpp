@@ -31,6 +31,26 @@ void AssetFactory::loadMeshes()
     instance._meshes.sphere = lithium::tinyobjloader_load("assets/sphere.obj", objectAttributes);
 }
 
+void loadTextureMaps(std::vector<std::shared_ptr<lithium::Texture<unsigned char>>>& textureMaps, const std::string& path)
+{
+    textureMaps.push_back(std::shared_ptr<lithium::ImageTexture>(
+        lithium::ImageTexture::load(std::filesystem::exists(path + "_basecolor_boosted.png")
+            ? (path + "_basecolor_boosted.png")
+            : (path + "_basecolor.png"), GL_RGB, GL_RGB)));
+    textureMaps.push_back(std::shared_ptr<lithium::ImageTexture>(
+        lithium::ImageTexture::load(path + "_normal.png", GL_RGB, GL_RGB)));
+    textureMaps.push_back(std::shared_ptr<lithium::ImageTexture>(
+        lithium::ImageTexture::load(path + "_metallic.png", GL_RED, GL_RED)));
+    textureMaps.push_back(std::shared_ptr<lithium::ImageTexture>(
+        lithium::ImageTexture::load(path + "_roughness.png", GL_RED, GL_RED)));
+
+    if(std::filesystem::exists(path + "_ao.png"))
+    {
+        textureMaps.push_back(std::shared_ptr<lithium::ImageTexture>(
+            lithium::ImageTexture::load(path + "_ao.png", GL_RGB, GL_RGB)));
+    }
+}
+
 void AssetFactory::loadTextures()
 {
     AssetFactory& instance = getInstance();
@@ -46,22 +66,30 @@ void AssetFactory::loadTextures()
     });
     instance._textures.skybox->setFilter(GL_LINEAR);
 
-    instance._textures.rustedIron.push_back(std::shared_ptr<lithium::ImageTexture>(
-        lithium::ImageTexture::load("assets/rustediron1-alt2-bl/rustediron2_basecolor.png", GL_SRGB, GL_RGB)));
-    instance._textures.rustedIron.push_back(std::shared_ptr<lithium::ImageTexture>(
-        lithium::ImageTexture::load("assets/rustediron1-alt2-bl/rustediron2_normal.png", GL_RGB, GL_RGB)));
-    instance._textures.rustedIron.push_back(std::shared_ptr<lithium::ImageTexture>(
-        lithium::ImageTexture::load("assets/rustediron1-alt2-bl/rustediron2_metallic.png", GL_RED, GL_RED)));
-    instance._textures.rustedIron.push_back(std::shared_ptr<lithium::ImageTexture>(
-        lithium::ImageTexture::load("assets/rustediron1-alt2-bl/rustediron2_roughness.png", GL_RED, GL_RED)));
-    instance._textures.rustedIron.push_back(std::shared_ptr<lithium::ImageTexture>(
-        lithium::ImageTexture::load("assets/rustediron1-alt2-bl/rustediron2_ao.png", GL_RGB, GL_RGB)));
+    loadTextureMaps(instance._textures.rustedIron, "assets/rustediron1-alt2-bl/rustediron2");
+    loadTextureMaps(instance._textures.scuffedGold, "assets/gold-scuffed-bl/gold-scuffed");
+
+    instance._textures.barberChair.push_back(std::shared_ptr<lithium::ImageTexture>(
+        lithium::ImageTexture::load("assets/BarberShopChair_01_4k/textures/BarberShopChair_01_diff_4k.jpg", GL_SRGB, GL_RGB, 4, false)));
+    instance._textures.barberChair.push_back(std::shared_ptr<lithium::ImageTexture>(
+        lithium::ImageTexture::load("assets/BarberShopChair_01_4k/textures/BarberShopChair_01_nor_gl_4k.jpg", GL_RGB, GL_RGB, 4, false)));
+    instance._textures.barberChair.push_back(std::shared_ptr<lithium::ImageTexture>(
+        lithium::ImageTexture::load("assets/BarberShopChair_01_4k/textures/BarberShopChair_01_arm_4k.jpg", GL_RGB, GL_RGB,  4, false)));
+
+    instance._textures.chessSet.push_back(std::shared_ptr<lithium::ImageTexture>(
+        lithium::ImageTexture::load("assets/chess_set_4k/textures/chess_set_board_diff_4k.jpg", GL_RGB, GL_RGB, 4, false)));
+    instance._textures.chessSet.push_back(std::shared_ptr<lithium::ImageTexture>(
+        lithium::ImageTexture::load("assets/chess_set_4k/textures/chess_set_board_nor_4k.jpg", GL_RGB, GL_RGB, 4, false)));
+    instance._textures.chessSet.push_back(std::shared_ptr<lithium::ImageTexture>(
+        lithium::ImageTexture::load("assets/chess_set_4k/textures/chess_set_board_arm_4k.jpg", GL_RGB, GL_RGB, 4, false)));
 }
 
 void AssetFactory::loadObjects()
 {
     AssetFactory& instance = getInstance();
     instance._gltfLoader.loadObjects(instance._objects.windTurbine, "assets/windturbine/windturbine.gltf");
+    instance._gltfLoader.loadObjects(instance._objects.barberChair, "assets/BarberShopChair_01_4k/BarberShopChair_01_4k.gltf");
+    instance._gltfLoader.loadObjects(instance._objects.chessSet, "assets/chess_set_4k/chess_set_4k.gltf");
 }
 
 void AssetFactory::loadFonts()
