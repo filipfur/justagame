@@ -23,15 +23,15 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     _background->stage();
 
     // Create and add a cube to the render pipeline, and stage it for rendering.
-    /*
     auto card = std::make_shared<lithium::Object>(AssetFactory::getMeshes()->card,
         std::vector<lithium::Object::TexturePointer>{AssetFactory::getTextures()->card});
-    card->setPosition(glm::vec3{0.0f});
+    card->setPosition(glm::vec3{1.0f, 0.0f, 2.0f});
+    card->setRotation(glm::vec3{90.0f, 0.0f, 0.0f});
     card->setScale(1.0f);
+    card->setGroupId(Pipeline::CARD);
     _pipeline->attach(card.get());
     _objects.push_back(card);
     card->stage();
-    */
 
     static constexpr size_t numSpheres = 15;
 
@@ -97,7 +97,7 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
         glm::vec3{1.0f, 1.0f, 0.0f},
     };
 
-    for(int i{0}; i < numSpheres; ++i)
+    /*for(int i{0}; i < numSpheres; ++i)
     {
         auto sphere = std::make_shared<lithium::Object>(
             std::shared_ptr<lithium::Mesh>(AssetFactory::getMeshes()->sphere->clone()),
@@ -132,11 +132,12 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     goldSphere->setGroupId(Pipeline::PBR);
     _objects.push_back(goldSphere);
     _pipeline->attach(goldSphere.get());
-    goldSphere->stage();
+    goldSphere->stage();*/
 
     //_cubemapHDR = lithium::CubemapHDR::load("assets/belfast_sunset_puresky_16k.hdr");
     //_cubemapHDR = lithium::CubemapHDR::load("assets/abandoned_tiled_room_16k.hdr");
     _cubemapHDR = lithium::CubemapHDR::load("assets/chess.hdr");
+    //_cubemapHDR = lithium::CubemapHDR::load("assets/school_quad_8k.hdr");
     _cubemapHDR->brdfLUT()->bind(GL_TEXTURE7);
     _cubemapHDR->irradianceMap()->bind(GL_TEXTURE8);
     _cubemapHDR->prefilterMap()->bind(GL_TEXTURE9);
@@ -158,14 +159,14 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
         o->stage();
     }*/
 
-    /*for(auto o : AssetFactory::getObjects()->barberChair)
+    for(auto o : AssetFactory::getObjects()->barberChair)
     {
         o->setTextures(AssetFactory::getTextures()->barberChair);
         o->setGroupId(Pipeline::PBR_POLY_HAVEN);
         _pipeline->attach(o.get());
         o->stage();
         o->setScale(2.0f);
-    }*/
+    }
 
     // Key cache for rotating the camera left and right.
     _keyCache = std::make_shared<lithium::Input::KeyCache>(
@@ -192,7 +193,8 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     setMaxFps(60.0f);
 
     // Set the camera oirigin position and target.
-    _pipeline->camera()->setTarget(glm::vec3{0.0f, 0.0f, 0.0f});
+    _pipeline->camera()->setTarget(glm::vec3{0.0f, 1.0f, 0.0f});
+    _pipeline->camera()->setTarget(card->position());
 
     printf("%s\n", glGetString(GL_VERSION));
 }
@@ -206,6 +208,7 @@ App::~App() noexcept
 
 void App::update(float dt)
 {
+    lithium::Updateable::update(dt);
     // Apply a rotation to the cube.
     /*for(auto o : _objects)
     {
@@ -230,11 +233,12 @@ void App::update(float dt)
     {
         _camY -= 5.0f * dt;
     }
-    static const float cameraRadius = 4.4f;
+    static const float cameraRadius = 5.4f;
     float camX = sin(_cameraAngle) * cameraRadius;
     float camZ = cos(_cameraAngle) * cameraRadius;
     _pipeline->camera()->setPosition(glm::vec3{camX, _camY, camZ});
     _cubemapHDR->bind(GL_TEXTURE0);
+    _pipeline->setTime(time());
     _pipeline->render();
     //lithium::CubemapHDR::draw(*_cubemapHDR, *_pipeline->camera());
 }

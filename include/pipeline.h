@@ -15,7 +15,8 @@ public:
         BACKGROUND,
         SKYBOX,
         PBR,
-        PBR_POLY_HAVEN
+        PBR_POLY_HAVEN,
+        CARD
     };
 
     Pipeline(const glm::ivec2& resolution);
@@ -29,6 +30,11 @@ public:
 
     virtual void setResolution(const glm::ivec2& resolution) override;
 
+    void setTime(float time)
+    {
+        _time = time;
+    }
+
 private:
     /* Shaders */
     std::shared_ptr<lithium::ShaderProgram> _blockShader{nullptr};
@@ -38,6 +44,7 @@ private:
     std::shared_ptr<lithium::ShaderProgram> _pbrShader{nullptr};
     std::shared_ptr<lithium::ShaderProgram> _pbrPolyHavenShader{nullptr};
     std::shared_ptr<lithium::ShaderProgram> _pbrBaseColorShader{nullptr};
+    std::shared_ptr<lithium::ShaderProgram> _cardShader{nullptr};
     std::shared_ptr<lithium::SimpleCamera> _camera{nullptr};
 
     /*Render groups*/
@@ -46,6 +53,7 @@ private:
     std::shared_ptr<lithium::RenderGroup> _pbrGroup;
     std::shared_ptr<lithium::RenderGroup> _pbrPolyHavenGroup;
     std::shared_ptr<lithium::RenderGroup> _pbrBaseColorGroup;
+    std::shared_ptr<lithium::RenderGroup> _cardGroup;
     std::shared_ptr<lithium::RenderGroup> _mainGroup;
 
     /*Render stages*/
@@ -58,4 +66,6 @@ private:
     
     /* Meshes */
     std::shared_ptr<lithium::Mesh> _screenMesh;
+
+    float _time{0.0f};
 };

@@ -18,6 +18,10 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
     _blockShader->setUniform("u_texture_0", 0);
     _blockShader->setUniform("u_projection", _camera->projection());
 
+    _cardShader = std::make_shared<lithium::ShaderProgram>("shaders/card.vert", "shaders/object.frag");
+    _cardShader->setUniform("u_texture_0", 0);
+    _cardShader->setUniform("u_projection", _camera->projection());
+
     _pbrShader = std::make_shared<lithium::ShaderProgram>("shaders/object.vert", "shaders/pbr.frag");
     _pbrShader->setUniform("u_albedo_map", 0);
     _pbrShader->setUniform("u_normal_map", 1);
@@ -87,6 +91,10 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
         return renderable->groupId() == PBR_POLY_HAVEN;
     });
 
+    _cardGroup = createRenderGroup([this](lithium::Renderable* renderable) -> bool {
+        return renderable->groupId() == CARD;
+    });
+
     _mainGroup = createRenderGroup([this](lithium::Renderable* renderable) -> bool {
         return dynamic_cast<lithium::Object*>(renderable) && !renderable->hasAttachments();
     });
@@ -117,6 +125,11 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
         _pbrPolyHavenShader->setUniform("u_view", _camera->view());
         _pbrPolyHavenShader->setUniform("u_view_pos", _camera->position());
         _pbrPolyHavenGroup->render(_pbrPolyHavenShader.get());
+
+        _cardShader->setUniform("u_view", _camera->view());
+        _cardShader->setUniform("u_view_pos", _camera->position());
+        _cardShader->setUniform("u_time", _time);
+        _cardGroup->render(_cardShader.get());
 
         _blockShader->setUniform("u_view", _camera->view());
         _blockShader->setUniform("u_time", 0.0f);

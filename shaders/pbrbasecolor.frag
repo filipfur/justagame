@@ -39,7 +39,7 @@ void main()
     F0 = mix(F0, albedo, metallic);
 
     vec3 Lo = vec3(0.0);
-    for(int i = 0; i < lights.length(); ++i) 
+    /*for(int i = 0; i < lights.length(); ++i) 
     {
         vec3 L = normalize(lights[i].position - fragPos);
         vec3 H = normalize(V + L);
@@ -61,7 +61,7 @@ void main()
   
         float NdotL = max(dot(N, L), 0.0);        
         Lo += (kD * albedo / PI + specular) * radiance * NdotL;
-    }
+    }*/
 
     //vec3 ambient = vec3(0.03) * albedo * ao;
     
