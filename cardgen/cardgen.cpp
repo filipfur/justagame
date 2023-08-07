@@ -117,7 +117,7 @@ void CardGen::loadCard(const std::filesystem::path& directory)
 
 void CardGen::updateCard()
 {
-    auto imageFrame = _canvas->frameById("canvas.0.0");
+    /*auto imageFrame = _canvas->frameById("canvas.0.0");
     imageFrame->setTextures(std::vector<lithium::Object::TexturePointer>{_cardIt->texture});
 
     auto titleFrame = _canvas->frameById("canvas.0.1");
@@ -128,12 +128,13 @@ void CardGen::updateCard()
 
     imageFrame->refresh();
     titleFrame->refresh();
-    bodyFrame->refresh();
+    bodyFrame->refresh();*/
 
     std::cout << "Selected card: " << _cardIt->title << std::endl;
 }
 
-CardGen::CardGen() : lithium::Application{"lithium-lab", glm::ivec2{1920, 1080}, lithium::Application::Mode::MULTISAMPLED_4X, false}
+CardGen::CardGen() : lithium::Application{"lithium-lab", glm::ivec2{1920, 1080}, lithium::Application::Mode::MULTISAMPLED_4X, false},
+    _cardLayoutSystem{}
 {
     _keyCache = std::make_shared<lithium::Input::KeyCache>(
         std::initializer_list<int>{GLFW_KEY_LEFT, GLFW_KEY_RIGHT});
@@ -168,8 +169,7 @@ CardGen::CardGen() : lithium::Application{"lithium-lab", glm::ivec2{1920, 1080},
 
     auto res = windowResolution();
 
-    glm::vec2 canvasDim{2048.0f};
-    //glm::vec2 canvasDim{res};
+    glm::vec2 canvasDim{5400.0f};
 
     setMaxFps(60);
 
@@ -177,9 +177,9 @@ CardGen::CardGen() : lithium::Application{"lithium-lab", glm::ivec2{1920, 1080},
     _canvas->loadUI("cardgen/assets/ui.json");
 
     auto canvasFrame = _canvas->frameById("canvas");
-    canvasFrame->setMesh(std::shared_ptr<lithium::Mesh>(lithium::Plane2D(glm::vec2{0.5f}, glm::vec2{64.0f})));
+    canvasFrame->setMesh(std::shared_ptr<lithium::Mesh>(lithium::Plane2D(glm::vec2{0.5f}, glm::vec2{180.0f})));
     canvasFrame->setTextures(std::vector<lithium::Object::TexturePointer>{checkboardTexture});
-    auto classFrame = _canvas->frameById("canvas.0");
+    /*auto classFrame = _canvas->frameById("canvas.0");
     classFrame->setColor(glm::vec3{0.2f});
 
     auto imageFrame = _canvas->frameById("canvas.0.0");
@@ -189,33 +189,52 @@ CardGen::CardGen() : lithium::Application{"lithium-lab", glm::ivec2{1920, 1080},
     titleFrame->setColor(glm::vec3{0.2f});
 
     auto myText = titleFrame->createTextRenderer()->createText(_font, _cardIt->title, 1.4f, lithium::Text::Alignment::CENTER, 1.0f, 1.05f);
-    auto bodyFrame = _canvas->frameById("body");
+    auto bodyFrame = _canvas->frameById("canvas.0.2");
     bodyFrame->setColor(glm::vec3{0.1});
 
-    auto bodyText = bodyFrame->createTextRenderer()->createText(_font, _cardIt->body, 1.1f, lithium::Text::Alignment::CENTER, 1.0f, 1.05f);
+    auto bodyText = bodyFrame->createTextRenderer()->createText(_font, _cardIt->body, 1.1f, lithium::Text::Alignment::CENTER, 1.0f, 1.05f);*/
 
+    lithium::json::Json json;
+    json.fromFile("cardgen/assets/card_a.json");
+    _cardLayoutSystem.load(json);
 
+    for(int i{0}; i < _cards.size(); ++i)
+    {
+        Card* card = &_cards[i];
+        int n = i + 1;
+        int x = n % 9;
+        int y = n / 9;
+        _cardLayoutSystem.root()->setPosition(glm::vec2{-2400.0f + x * 600.0f, 2250.0f + y * -900.0f});
+        lithium::FrameLayout* cardLayout = canvasFrame->layout()->appendChild(*_cardLayoutSystem.root());
+        _canvas->refreshUI();
+        auto cardFrame = _canvas->addFrame(cardLayout);
+        cardFrame->frameById("thumbnail")->setTextures(std::vector<lithium::Object::TexturePointer>{card->texture});
+        dynamic_cast<lithium::Frame*>(cardFrame->frameById("title")->setColor(lithium::Color(0x222222)))
+            ->createTextRenderer()->createText(_font, card->title, 1.4f, lithium::Text::Alignment::CENTER, 1.0f, 1.05f);
+        dynamic_cast<lithium::Frame*>(cardFrame->frameById("body")->setColor(lithium::Color(0x111111)))
+            ->createTextRenderer()->createText(_font, card->body, 1.1f, lithium::Text::Alignment::CENTER, 1.0f, 1.05f);
+    }
 
-    auto slot0Text = _canvas->frameById("slots.0.0");
+    /*auto slot0Text = _canvas->frameById("slots.0.0");
     slot0Text->setColor(lithium::black);
     slot0Text->setOpacity(0.0f);
     slot0Text->createTextRenderer()->createText(_font, "1", 1.0f, lithium::Text::Alignment::CENTER, 1.0f, 1.05f);
     auto slot0Img = _canvas->frameById("slots.0");
-    slot0Img->setTextures(std::vector<lithium::Object::TexturePointer>{checkboardTexture});
+    slot0Img->setTextures(std::vector<lithium::Object::TexturePointer>{checkboardTexture});*/
 
     //std::shared_ptr<lithium::Frame> slot1 = std::make_shared<lithium::Frame>(slot0Img->layout()->clone());
     //_canvas->refreshUI();
 
-    auto slots = _canvas->frameById("slots");
-    slots->setColor(glm::vec3{0.1f});
+    /*auto slots = _canvas->frameById("slots");
+    slots->setColor(glm::vec3{0.1f});*/
 
-    auto classFrame2 = _canvas->frameById("canvas.1");
+    /*auto classFrame2 = _canvas->frameById("canvas.1");
     classFrame2->setColor(glm::vec3{0.2f});
     classFrame2->child(0)->setTextures(std::vector<lithium::Object::TexturePointer>{_cardIt->texture});
     classFrame2->child(1)->setColor(glm::vec3{0.2f});
     classFrame2->child(1)->createTextRenderer()->createText(_font, _cardIt->title, 1.4f, lithium::Text::Alignment::CENTER, 1.0f, 1.05f);
     classFrame2->child(2)->setColor(glm::vec3{0.1f});
-    classFrame2->child(2)->createTextRenderer()->createText(_font, _cardIt->body, 1.1f, lithium::Text::Alignment::CENTER, 1.0f, 1.05f);
+    classFrame2->child(2)->createTextRenderer()->createText(_font, _cardIt->body, 1.1f, lithium::Text::Alignment::CENTER, 1.0f, 1.05f);*/
 
     input()->setDragCallback([this](int button, int modifiers, const glm::vec2& start, const glm::vec2& current, const glm::vec2& delta, bool completed) {
         if(button == GLFW_MOUSE_BUTTON_LEFT)
@@ -229,6 +248,10 @@ CardGen::CardGen() : lithium::Application{"lithium-lab", glm::ivec2{1920, 1080},
         return true;
     });
 
+    input()->addPressedCallback(GLFW_KEY_F1, [this](int key, int mods) {
+        generateImage("canvas");
+        return true;
+    });
     input()->addPressedCallback(GLFW_KEY_F5, [this](int key, int mods) {
         generateImage("canvas.0");
         return true;

@@ -3,66 +3,15 @@
     "mode": "absolute",
     "margin": [0.0],
     "padding": [0.0],
-    "dimension": [2048.0, 2048.0],
+    "dimension": [5400.0, 5400.0],
     "position": [0.0, 0.0],
     "children": [
         {
             "mode": "absolute",
             "margin": [0.0],
             "padding": [0.0],
-            "dimension": [900.0, 900.0],
-            "position": [-500.0, 0.0],
-            "alignment": "left",
-            "children": [
-                {
-                    "mode": "fixed",
-                    "margin": [0.0, 0.0, 0.0, 0.0],
-                    "padding": [0.0],
-                    "dimension": [600.0, 480.0]
-                },
-                {
-                    "mode": "fixed",
-                    "margin": [0.0, 0.0, 0.0, 0.0],
-                    "padding": [0.0],
-                    "dimension": [600.0, 80.0]
-                },
-                {
-                    "id": "slots",
-                    "mode": "fixed",
-                    "margin": [0.0, 0.0, 0.0, 0.0],
-                    "padding": [0.0],
-                    "dimension": [600.0, 80.0],
-                    "orientation": "horizontal",
-                    "children":[
-                        {
-                            "mode": "fixed",
-                            "margin": [8.0],
-                            "dimension": [64.0, 64.0],
-                            "children": [
-                                {
-                                    "mode": "absolute",
-                                    "position": [16.0, 16.0],
-                                    "dimension": [32.0, 32.0]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "id": "body",
-                    "mode": "fixed",
-                    "margin": [0.0, 0.0, 0.0, 0.0],
-                    "padding": [0.0],
-                    "dimension": [600.0, 260.0],
-                }
-            ]
-        },
-        {
-            "mode": "absolute",
-            "margin": [0.0],
-            "padding": [0.0],
-            "dimension": [900.0, 900.0],
-            "position": [500.0, 0.0],
+            "dimension": [600.0, 900.0],
+            "position": [-2400.0, 2250.0],
             "alignment": "left",
             "children": [
                 {

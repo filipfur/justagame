@@ -21,6 +21,7 @@ float BezierBlend(float t)
 void main()
 {
     texCoord = aTexCoords;
+    texCoord = vec2(aTexCoords.x + 0.11111 * int(mod(u_time * 0.5, 5.0)) * step(0.2, dot(vec3(0,0,1), aNormal)), aTexCoords.y);
     mat3 normalMatrix = transpose(inverse(mat3(u_model)));
     normal = normalMatrix * aNormal;
 

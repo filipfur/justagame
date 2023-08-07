@@ -44,4 +44,5 @@ private:
     std::vector<Card>::iterator _cardIt;
     std::shared_ptr<lithium::ImageTexture> _defaultTexture;
     std::vector<lithium::FileWatch> _cardFileWatches;
+    lithium::LayoutSystem _cardLayoutSystem;
 };
