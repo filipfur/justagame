@@ -25,7 +25,7 @@ public:
         std::cout << "FPS: " << fps << std::endl;
     }
 
-    void generateImage(const std::string& id);
+    void generateImage(const std::string& id, const std::string& destination="test.png");
     
     void loadCards();
     void loadCard(const std::filesystem::path& filename);

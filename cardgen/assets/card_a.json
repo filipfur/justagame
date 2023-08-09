@@ -25,7 +25,7 @@
             "mode": "fixed",
             "margin": [0.0, 0.0, 0.0, 0.0],
             "padding": [0.0],
-            "dimension": [600.0, 340.0]
+            "dimension": [600.0, 300.0]
         }
     ]
 }

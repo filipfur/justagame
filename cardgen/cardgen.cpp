@@ -7,7 +7,7 @@
 #include "utility.h"
 #include "glcolor.h"
 
-void CardGen::generateImage(const std::string& id)
+void CardGen::generateImage(const std::string& id, const std::string& destination)
 {
     lithium::Frame* frame = _canvas->frameById(id);
 
@@ -24,7 +24,7 @@ void CardGen::generateImage(const std::string& id)
     int numOfComponents = 3; // RGB
     int strideInBytes   = width * 3;
     stbi_flip_vertically_on_write(true);
-    stbi_write_png("test.png", width, height, 3, data, width * 3);
+    stbi_write_png(destination.c_str(), width, height, 3, data, width * 3);
     stbi_image_free(data);
 }
 
@@ -194,6 +194,14 @@ CardGen::CardGen() : lithium::Application{"lithium-lab", glm::ivec2{1920, 1080},
 
     auto bodyText = bodyFrame->createTextRenderer()->createText(_font, _cardIt->body, 1.1f, lithium::Text::Alignment::CENTER, 1.0f, 1.05f);*/
 
+    const lithium::Color accent{0x75c0eb};
+    const lithium::Color gray{0x202020};
+    const lithium::Color darkGray{0x101010};
+
+    auto backsideFrame = _canvas->frameById("backside");
+    backsideFrame->setColor(accent);
+    backsideFrame->child(0)->setColor(gray);
+
     lithium::json::Json json;
     json.fromFile("cardgen/assets/card_a.json");
     _cardLayoutSystem.load(json);
@@ -208,10 +216,11 @@ CardGen::CardGen() : lithium::Application{"lithium-lab", glm::ivec2{1920, 1080},
         lithium::FrameLayout* cardLayout = canvasFrame->layout()->appendChild(*_cardLayoutSystem.root());
         _canvas->refreshUI();
         auto cardFrame = _canvas->addFrame(cardLayout);
+        cardFrame->setColor(accent);
         cardFrame->frameById("thumbnail")->setTextures(std::vector<lithium::Object::TexturePointer>{card->texture});
-        dynamic_cast<lithium::Frame*>(cardFrame->frameById("title")->setColor(lithium::Color(0x222222)))
+        dynamic_cast<lithium::Frame*>(cardFrame->frameById("title")->setColor(gray))
             ->createTextRenderer()->createText(_font, card->title, 1.4f, lithium::Text::Alignment::CENTER, 1.0f, 1.05f);
-        dynamic_cast<lithium::Frame*>(cardFrame->frameById("body")->setColor(lithium::Color(0x111111)))
+        dynamic_cast<lithium::Frame*>(cardFrame->frameById("body")->setColor(darkGray))
             ->createTextRenderer()->createText(_font, card->body, 1.1f, lithium::Text::Alignment::CENTER, 1.0f, 1.05f);
     }
 
@@ -249,7 +258,7 @@ CardGen::CardGen() : lithium::Application{"lithium-lab", glm::ivec2{1920, 1080},
     });
 
     input()->addPressedCallback(GLFW_KEY_F1, [this](int key, int mods) {
-        generateImage("canvas");
+        generateImage("canvas", "assets/card/test.png");
         return true;
     });
     input()->addPressedCallback(GLFW_KEY_F5, [this](int key, int mods) {

@@ -1,0 +1,3 @@
+@title Blueprints: Wind Farm
+Build a wind farm that will
+generate 2 energy per turn.

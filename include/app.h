@@ -4,6 +4,7 @@
 #include "pipeline.h"
 #include "glmesh.h"
 #include "glcubemaphdr.h"
+#include "hand.h"
 
 class App : public lithium::Application
 {
@@ -23,6 +24,7 @@ protected:
     }
 
 private:
+    Hand _hand;
     std::shared_ptr<Pipeline> _pipeline{nullptr};
     std::shared_ptr<lithium::Object> _skybox{nullptr};
     std::vector<std::shared_ptr<lithium::Object>> _objects;

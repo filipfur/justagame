@@ -3,6 +3,7 @@
 #include "assetfactory.h"
 
 #include "glcube.h"
+#include "cardobject.h"
 
 App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Application::Mode::MULTISAMPLED_4X, false}
 {
@@ -22,16 +23,20 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     _pipeline->attach(_background.get());
     _background->stage();
 
+    CardObject::sharedMesh = AssetFactory::getMeshes()->card;
+    CardObject::sharedTextures.push_back(AssetFactory::getTextures()->card);
+
     // Create and add a cube to the render pipeline, and stage it for rendering.
-    auto card = std::make_shared<lithium::Object>(AssetFactory::getMeshes()->card,
-        std::vector<lithium::Object::TexturePointer>{AssetFactory::getTextures()->card});
-    card->setPosition(glm::vec3{1.0f, 0.0f, 2.0f});
-    card->setRotation(glm::vec3{90.0f, 0.0f, 0.0f});
-    card->setScale(1.0f);
-    card->setGroupId(Pipeline::CARD);
-    _pipeline->attach(card.get());
-    _objects.push_back(card);
-    card->stage();
+    for(int i{0}; i < 7; ++ i)
+    {
+        auto card = std::make_shared<CardObject>(i, i + 1);
+        card->setPosition(glm::vec3{1.0f, 0.025f * i, 2.0f});
+        card->setRotation(glm::vec3{90.0f, 0.0f, 0.0f});
+        card->setGroupId(Pipeline::CARD);
+        _pipeline->attach(card.get());
+        _hand.addCard(card);
+        card->stage();
+    }
 
     static constexpr size_t numSpheres = 15;
 
@@ -194,7 +199,7 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
 
     // Set the camera oirigin position and target.
     _pipeline->camera()->setTarget(glm::vec3{0.0f, 1.0f, 0.0f});
-    _pipeline->camera()->setTarget(card->position());
+    _pipeline->camera()->setTarget(glm::vec3{1.0f, 0.0f, 2.0f});
 
     printf("%s\n", glGetString(GL_VERSION));
 }
@@ -237,6 +242,7 @@ void App::update(float dt)
     float camX = sin(_cameraAngle) * cameraRadius;
     float camZ = cos(_cameraAngle) * cameraRadius;
     _pipeline->camera()->setPosition(glm::vec3{camX, _camY, camZ});
+    _hand.update(dt);
     _cubemapHDR->bind(GL_TEXTURE0);
     _pipeline->setTime(time());
     _pipeline->render();
