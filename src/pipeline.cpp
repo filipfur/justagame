@@ -3,6 +3,7 @@
 
 Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resolution},
     _camera{new lithium::SimpleCamera(glm::perspective(glm::radians(45.0f), (float)resolution.x / (float)resolution.y, 0.1f, 100.0f))},
+    _offscreenBuffer{std::make_shared<lithium::FrameBuffer>(resolution)},
     _frameBuffer{std::make_shared<lithium::FrameBuffer>(resolution)},
     _cameraUBO{std::make_shared<lithium::UniformBufferObject>(sizeof(glm::mat4) * 2 + sizeof(glm::vec3), "CameraUBO", 0)}
 {
@@ -16,11 +17,13 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
 
     _blockShader = std::make_shared<lithium::ShaderProgram>("shaders/object.vert", "shaders/object.frag");
     _blockShader->setUniform("u_texture_0", 0);
-    _blockShader->setUniform("u_projection", _camera->projection());
 
     _cardShader = std::make_shared<lithium::ShaderProgram>("shaders/card.vert", "shaders/object.frag");
     _cardShader->setUniform("u_texture_0", 0);
-    _cardShader->setUniform("u_projection", _camera->projection());
+
+    _offscreenShader = std::make_shared<lithium::ShaderProgram>("shaders/object.vert", "shaders/offscreen.frag");
+
+    _offCardShader = std::make_shared<lithium::ShaderProgram>("shaders/card.vert", "shaders/offscreen.frag");
 
     _pbrShader = std::make_shared<lithium::ShaderProgram>("shaders/object.vert", "shaders/pbr.frag");
     _pbrShader->setUniform("u_albedo_map", 0);
@@ -31,7 +34,6 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
     _pbrShader->setUniform("u_brdf_lut", 7);
     _pbrShader->setUniform("u_irradiance_map", 8);
     _pbrShader->setUniform("u_prefilter_map", 9);
-    _pbrShader->setUniform("u_projection", _camera->projection());
 
     _pbrPolyHavenShader = std::make_shared<lithium::ShaderProgram>("shaders/object.vert", "shaders/pbrpolyhaven.frag");
     _pbrPolyHavenShader->setUniform("u_albedo_map", 0);
@@ -40,10 +42,8 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
     _pbrPolyHavenShader->setUniform("u_brdf_lut", 7);
     _pbrPolyHavenShader->setUniform("u_irradiance_map", 8);
     _pbrPolyHavenShader->setUniform("u_prefilter_map", 9);
-    _pbrPolyHavenShader->setUniform("u_projection", _camera->projection());
 
     _pbrBaseColorShader = std::make_shared<lithium::ShaderProgram>("shaders/object.vert", "shaders/pbrbasecolor.frag");
-    _pbrBaseColorShader->setUniform("u_projection", _camera->projection());
     _pbrBaseColorShader->setUniform("u_brdf_lut", 7);
     _pbrBaseColorShader->setUniform("u_irradiance_map", 8);
     _pbrBaseColorShader->setUniform("u_prefilter_map", 9);
@@ -56,7 +56,14 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
     
     _msaaShader = std::make_shared<lithium::ShaderProgram>("shaders/screenshader.vert", "shaders/msaa.frag");
     _msaaShader->setUniform("u_texture", 0);
+    _msaaShader->setUniform("u_id_map", 2);
     _msaaShader->setUniform("u_resolution", resolution);
+
+    _offscreenBuffer->bind();
+    _offscreenBuffer->createTexture(GL_COLOR_ATTACHMENT0, GL_RED, GL_RED, GL_UNSIGNED_BYTE, GL_TEXTURE_2D);
+    _offscreenBuffer->createTexture(GL_DEPTH_STENCIL_ATTACHMENT, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, GL_TEXTURE_2D);
+    _offscreenBuffer->declareBuffers();
+    _offscreenBuffer->unbind();
 
     _frameBuffer->bind();
     _frameBuffer->createTexture(GL_COLOR_ATTACHMENT0, GL_RGBA16F, GL_RGBA, GL_FLOAT, GL_TEXTURE_2D_MULTISAMPLE);
@@ -65,7 +72,14 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
     _frameBuffer->unbind();
 
     _cameraUBO->bindBufferBase({
-        _skyboxShader.get()});
+        _skyboxShader.get(),
+        _blockShader.get(),
+        _cardShader.get(),
+        _pbrShader.get(),
+        _pbrPolyHavenShader.get(),
+        _pbrBaseColorShader.get(),
+        _offscreenShader.get(),
+        _offCardShader.get()});
 
     _cameraUBO->bufferSubData(0, _camera->projection());
 
@@ -99,9 +113,18 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
         return dynamic_cast<lithium::Object*>(renderable) && !renderable->hasAttachments();
     });
 
+    _offscreenStage = addRenderStage(std::make_shared<lithium::RenderStage>(_offscreenBuffer, [this](){
+        static const GLuint viewOffset{static_cast<GLuint>(sizeof(glm::mat4))};
+        static const GLuint eyePosOffset{static_cast<GLuint>(sizeof(glm::mat4) * 2)};
+        _cameraUBO->bufferSubData(viewOffset, _camera->view());
+        _cameraUBO->bufferSubData(eyePosOffset, _camera->position());
+        clearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        //_mainGroup->render(_blockShader.get());
+        _cardGroup->render(_offCardShader.get());
+    }));
+
     _mainStage = addRenderStage(std::make_shared<lithium::RenderStage>(_frameBuffer, [this](){
-        _cameraUBO->bufferSubData(sizeof(glm::mat4), _camera->view());
-        _cameraUBO->bufferSubData(sizeof(glm::mat4) * 2, _camera->position());
         clearColor(0.0f, 0.0f, 0.0f, 0.0f);
         clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
@@ -109,29 +132,19 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
         //_screenGroup->render(_screenShader.get());
         //enableDepthWriting();
 
-        _skyboxShader->setUniform("u_view", glm::mat4(glm::mat3(_camera->view())));
         disableDepthWriting();
         _skyboxGroup->render(_skyboxShader);
         enableDepthWriting();
 
-        _pbrShader->setUniform("u_view", _camera->view());
-        _pbrShader->setUniform("u_view_pos", _camera->position());
         _pbrGroup->render(_pbrShader.get());
 
-        _pbrBaseColorShader->setUniform("u_view", _camera->view());
-        _pbrBaseColorShader->setUniform("u_view_pos", _camera->position());
         _pbrBaseColorGroup->render(_pbrBaseColorShader.get());
 
-        _pbrPolyHavenShader->setUniform("u_view", _camera->view());
-        _pbrPolyHavenShader->setUniform("u_view_pos", _camera->position());
         _pbrPolyHavenGroup->render(_pbrPolyHavenShader.get());
 
-        _cardShader->setUniform("u_view", _camera->view());
-        _cardShader->setUniform("u_view_pos", _camera->position());
         _cardShader->setUniform("u_time", _time);
         _cardGroup->render(_cardShader.get());
 
-        _blockShader->setUniform("u_view", _camera->view());
         _blockShader->setUniform("u_time", 0.0f);
         _mainGroup->render(_blockShader.get());
     }));
@@ -144,6 +157,7 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
         _msaaShader->use();
         _mainStage->frameBuffer()->texture(GL_COLOR_ATTACHMENT0)->bind(GL_TEXTURE0);
         _mainStage->frameBuffer()->bindTexture(GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE1);
+        _offscreenStage->frameBuffer()->texture(GL_COLOR_ATTACHMENT0)->bind(GL_TEXTURE2);
         _screenMesh->bind();
         _screenMesh->draw();
     }));

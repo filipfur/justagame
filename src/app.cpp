@@ -27,18 +27,18 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     CardObject::sharedTextures.push_back(AssetFactory::getTextures()->card);
 
     // Create and add a cube to the render pipeline, and stage it for rendering.
-    for(int i{0}; i < 7; ++ i)
+    for(int i{0}; i < 14; ++ i)
     {
         auto card = std::make_shared<CardObject>(i, i + 1);
-        card->setPosition(glm::vec3{1.0f, 0.025f * i, 2.0f});
+        card->setPosition(glm::vec3{8.0f, 0.005f * i, 0.0f});
         card->setRotation(glm::vec3{90.0f, 0.0f, 0.0f});
         card->setGroupId(Pipeline::CARD);
         _pipeline->attach(card.get());
-        _hand.addCard(card);
+        _stack.push_back(card);
         card->stage();
     }
 
-    static constexpr size_t numSpheres = 15;
+    /*static constexpr size_t numSpheres = 15;
 
     static glm::vec3 spherePositions[numSpheres] = {
         glm::vec3{-2.0f, 0.5f, 0.0f},
@@ -102,7 +102,7 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
         glm::vec3{1.0f, 1.0f, 0.0f},
     };
 
-    /*for(int i{0}; i < numSpheres; ++i)
+    for(int i{0}; i < numSpheres; ++i)
     {
         auto sphere = std::make_shared<lithium::Object>(
             std::shared_ptr<lithium::Mesh>(AssetFactory::getMeshes()->sphere->clone()),
@@ -158,20 +158,68 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     _pipeline->attach(_skybox.get());
     _skybox->stage();
 
+
+    input()->setCursorListener([this](float x, float y) {
+        static int lastId{-1};
+        int id = objectIdAt(static_cast<int>(x), static_cast<int>(y));
+        if(id != lastId)
+        {
+            std::cout << "id=" << id << ", x=" << x << ", y=" << y << std::endl;
+            lastId = id;
+            _hand.hover(id);
+        }
+        return true;
+    });
+
+    input()->setDragCallback([this](int button, int mods, const glm::vec2& start, const glm::vec2& current, const glm::vec2& delta, lithium::Input::DragState dragState) {
+        static int draggingId{-1};
+        switch(dragState)
+        {
+            case lithium::Input::DragState::START:
+                if(_hand.hovered())
+                {
+                    draggingId = _hand.hovered()->id();
+                }
+                else
+                {
+                    draggingId = -1;
+                }
+                break;
+            case lithium::Input::DragState::DRAG:
+                if(draggingId == -1)
+                {
+                    break;
+                }
+                if(current.y - start.y > 32.0f)
+                {
+                    std::cout << "Discard: " << draggingId << std::endl;
+                    draggingId = -1;
+                }
+                else if(current.y - start.y < -32.0f)
+                {
+                    std::cout << "Play: " << draggingId << std::endl;
+                    _hand.cardById(draggingId)->play();
+                    draggingId = -1;
+                }
+                break;
+        }
+        return true;
+    });
+
     /*for(auto o : AssetFactory::getObjects()->windTurbine)
     {
         _pipeline->attach(o.get());
         o->stage();
     }*/
 
-    for(auto o : AssetFactory::getObjects()->barberChair)
+    /*for(auto o : AssetFactory::getObjects()->barberChair)
     {
         o->setTextures(AssetFactory::getTextures()->barberChair);
         o->setGroupId(Pipeline::PBR_POLY_HAVEN);
         _pipeline->attach(o.get());
         o->stage();
         o->setScale(2.0f);
-    }
+    }*/
 
     // Key cache for rotating the camera left and right.
     _keyCache = std::make_shared<lithium::Input::KeyCache>(
@@ -195,11 +243,28 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
         return true;
     });
 
-    setMaxFps(60.0f);
+    input()->addPressedCallback(GLFW_KEY_Q, [this](int key, int mods) {
+        auto it = _stack.begin();// + (rand() % _stack.size());
+        if(it == _stack.end())
+        {
+            return false;
+        }
+        (*it)->draw();
+        _hand.addCard(*it);
+        _stack.erase(it);
+        return true;
+    });
+
+    input()->addPressedCallback(GLFW_KEY_TAB, [this](int key, int mods) {
+        _hand.cycleHover();
+        return true;
+    });
+
+    setMaxFps(120.0f);
 
     // Set the camera oirigin position and target.
     _pipeline->camera()->setTarget(glm::vec3{0.0f, 1.0f, 0.0f});
-    _pipeline->camera()->setTarget(glm::vec3{1.0f, 0.0f, 2.0f});
+    //_pipeline->camera()->setTarget(glm::vec3{1.0f, 0.0f, 2.0f});
 
     printf("%s\n", glGetString(GL_VERSION));
 }
@@ -209,6 +274,17 @@ App::~App() noexcept
     _pipeline = nullptr;
     _background = nullptr;
     _objects.clear();
+}
+
+// Screen coordinates (cursor position) not normalized device coordinates.
+int App::objectIdAt(int x, int y)
+{
+    auto fbo = _pipeline->offscreenBuffer();
+    fbo->bind();
+    static GLubyte pixel[3];
+    fbo->readPixel(x, fbo->resolution().y - y, GL_RED, GL_UNSIGNED_BYTE, pixel);
+    fbo->unbind();
+    return static_cast<int>(pixel[0]);
 }
 
 void App::update(float dt)
@@ -238,7 +314,7 @@ void App::update(float dt)
     {
         _camY -= 5.0f * dt;
     }
-    static const float cameraRadius = 5.4f;
+    static const float cameraRadius = 10.0f;
     float camX = sin(_cameraAngle) * cameraRadius;
     float camZ = cos(_cameraAngle) * cameraRadius;
     _pipeline->camera()->setPosition(glm::vec3{camX, _camY, camZ});

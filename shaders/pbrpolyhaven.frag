@@ -13,13 +13,13 @@ uniform sampler2D u_brdf_lut;
 
 uniform vec4 u_color;
 uniform float u_time;
-uniform vec3 u_view_pos;
 
 out vec4 fragColor;
 
 in vec2 texCoord;
 in vec3 normal;
 in vec3 fragPos;
+in vec3 eyePos;
 
 const float ao = 0.5;
 
@@ -53,7 +53,7 @@ void main()
     //vec3 N = normalize(normal);
     vec3 N = getNormalFromMap();
 
-    vec3 V = normalize(u_view_pos - fragPos);
+    vec3 V = normalize(eyePos - fragPos);
     vec3 R = reflect(-V, N);   
 
     const float MAX_REFLECTION_LOD = 4.0;

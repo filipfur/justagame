@@ -35,9 +35,16 @@ public:
         _time = time;
     }
 
+    std::shared_ptr<lithium::FrameBuffer> offscreenBuffer()
+    {
+        return _offscreenStage->frameBuffer();
+    }
+
 private:
     /* Shaders */
     std::shared_ptr<lithium::ShaderProgram> _blockShader{nullptr};
+    std::shared_ptr<lithium::ShaderProgram> _offscreenShader{nullptr};
+    std::shared_ptr<lithium::ShaderProgram> _offCardShader{nullptr};
     std::shared_ptr<lithium::ShaderProgram> _msaaShader{nullptr};
     std::shared_ptr<lithium::ShaderProgram> _screenShader{nullptr};
     std::shared_ptr<lithium::ShaderProgram> _skyboxShader{nullptr};
@@ -57,10 +64,12 @@ private:
     std::shared_ptr<lithium::RenderGroup> _mainGroup;
 
     /*Render stages*/
+    std::shared_ptr<lithium::RenderStage> _offscreenStage;
     std::shared_ptr<lithium::RenderStage> _mainStage;
     std::shared_ptr<lithium::RenderStage> _finalStage;
 
     /* Framebuffers */
+    std::shared_ptr<lithium::FrameBuffer> _offscreenBuffer;
     std::shared_ptr<lithium::FrameBuffer> _frameBuffer;
     std::shared_ptr<lithium::UniformBufferObject> _cameraUBO;
     

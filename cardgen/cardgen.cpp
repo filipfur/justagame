@@ -245,7 +245,7 @@ CardGen::CardGen() : lithium::Application{"lithium-lab", glm::ivec2{1920, 1080},
     classFrame2->child(2)->setColor(glm::vec3{0.1f});
     classFrame2->child(2)->createTextRenderer()->createText(_font, _cardIt->body, 1.1f, lithium::Text::Alignment::CENTER, 1.0f, 1.05f);*/
 
-    input()->setDragCallback([this](int button, int modifiers, const glm::vec2& start, const glm::vec2& current, const glm::vec2& delta, bool completed) {
+    input()->setDragCallback([this](int button, int modifiers, const glm::vec2& start, const glm::vec2& current, const glm::vec2& delta, lithium::Input::DragState dragState) {
         if(button == GLFW_MOUSE_BUTTON_LEFT)
         {
             _canvas->move(glm::vec2(-delta.x, delta.y));

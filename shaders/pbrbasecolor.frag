@@ -5,7 +5,6 @@
 
 uniform vec4 u_color;
 uniform float u_time;
-uniform vec3 u_view_pos;
 uniform vec4 u_base_color;
 uniform float u_roughness;
 uniform float u_metallic;
@@ -19,6 +18,7 @@ out vec4 fragColor;
 in vec2 texCoord;
 in vec3 normal;
 in vec3 fragPos;
+in vec3 eyePos;
 
 const float ao = 1.0;
 
@@ -29,7 +29,7 @@ void main()
     float roughness = u_roughness;
 
     vec3 N = normalize(normal);
-    vec3 V = normalize(u_view_pos - fragPos);
+    vec3 V = normalize(eyePos - fragPos);
     vec3 R = reflect(-V, N);   
 
     const float MAX_REFLECTION_LOD = 4.0;

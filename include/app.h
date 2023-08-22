@@ -24,14 +24,18 @@ protected:
     }
 
 private:
+    int objectIdAt(int x, int y);
+
+
     Hand _hand;
+    std::vector<std::shared_ptr<CardObject>> _stack;
     std::shared_ptr<Pipeline> _pipeline{nullptr};
     std::shared_ptr<lithium::Object> _skybox{nullptr};
     std::vector<std::shared_ptr<lithium::Object>> _objects;
     std::shared_ptr<lithium::Object> _background;
     std::shared_ptr<lithium::CubemapHDR> _cubemapHDR;
     float _cameraAngle{0.0f};
-    float _camY{0.0f};
+    float _camY{10.0f};
     float _lod{0.0f};
     std::shared_ptr<lithium::Input::KeyCache> _keyCache;
 };
