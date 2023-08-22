@@ -18,6 +18,9 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
     _blockShader = std::make_shared<lithium::ShaderProgram>("shaders/object.vert", "shaders/object.frag");
     _blockShader->setUniform("u_texture_0", 0);
 
+    _tileShader = std::make_shared<lithium::ShaderProgram>("shaders/object.vert", "shaders/object.frag");
+    _tileShader->setUniform("u_texture_0", 0);
+
     _cardShader = std::make_shared<lithium::ShaderProgram>("shaders/card.vert", "shaders/object.frag");
     _cardShader->setUniform("u_texture_0", 0);
 
@@ -78,6 +81,7 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
         _pbrShader.get(),
         _pbrPolyHavenShader.get(),
         _pbrBaseColorShader.get(),
+        _tileShader.get(),
         _offscreenShader.get(),
         _offCardShader.get()});
 
@@ -103,6 +107,10 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
 
     _pbrPolyHavenGroup = createRenderGroup([this](lithium::Renderable* renderable) -> bool {
         return renderable->groupId() == PBR_POLY_HAVEN;
+    });
+
+    _tileGroup = createRenderGroup([this](lithium::Renderable* renderable) -> bool {
+        return renderable->groupId() == TILES;
     });
 
     _cardGroup = createRenderGroup([this](lithium::Renderable* renderable) -> bool {
@@ -144,6 +152,12 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
 
         _cardShader->setUniform("u_time", _time);
         _cardGroup->render(_cardShader.get());
+
+        glLineWidth(4.0f);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        _tileShader->setUniform("u_time", 0.0f);
+        _tileGroup->render(_tileShader.get());
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         _blockShader->setUniform("u_time", 0.0f);
         _mainGroup->render(_blockShader.get());

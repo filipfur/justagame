@@ -221,6 +221,48 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
         o->setScale(2.0f);
     }*/
 
+    float triSide = 1.0f;
+    float triHeight = sinf(glm::pi<float>() / 3.0f);
+
+    std::vector<GLfloat> triVertices;/* = {
+        -triSide * 0.5f, 0.0f, -triHeight * 0.5f,      0.0f, 1.0f, 0.0f,       0.0f, 1.0f,
+        0.0f, 0.0f, triHeight * 0.5f,      0.0f, 1.0f, 0.0f,       0.0f, 1.0f,
+        triSide * 0.5f, 0.0f, -triHeight * 0.5f,      0.0f, 1.0f, 0.0f,       0.0f, 1.0f,
+        triSide, 0.0f, triHeight * 0.5f,      0.0f, 1.0f, 0.0f,       0.0f, 1.0f,
+    };
+    std::vector<GLuint> triIndices = {
+        0, 1, 2
+    };*/
+
+    const int numRows = 9;
+    const int numCols = 23;
+
+    for(int z{0}; z < numRows; ++z)
+    {
+        int zMod = z % 2;
+        for(int x{0}; x < numCols + 2; ++x)
+        {
+            triVertices.insert(triVertices.end(), {
+                triSide * x * 0.5f, 0.0f, triHeight * z + ((x % 2 == zMod) ? -triHeight : triHeight) * 0.5f,   0.0f, 1.0f, 0.0f,   0.0f, 1.0f
+            });
+        }
+    }
+
+    auto triMesh = std::make_shared<lithium::Mesh>(std::vector<lithium::VertexArrayBuffer::AttributeType>{
+        lithium::VertexArrayBuffer::AttributeType::VEC3,
+        lithium::VertexArrayBuffer::AttributeType::VEC3,
+        lithium::VertexArrayBuffer::AttributeType::VEC2
+    }, triVertices);
+
+    triMesh->setDrawMode(GL_TRIANGLE_STRIP);
+
+    auto triObject = std::make_shared<lithium::Object>(triMesh, std::vector<lithium::Object::TexturePointer>{});
+    triObject->setPosition(glm::vec3{-numCols * triSide * 0.5f * 0.5f, 0.0f, -numRows * triHeight * 0.5f});
+    triObject->setGroupId(Pipeline::TILES);
+    _objects.push_back(triObject);
+    _pipeline->attach(triObject.get());
+    triObject->stage();
+
     // Key cache for rotating the camera left and right.
     _keyCache = std::make_shared<lithium::Input::KeyCache>(
         std::initializer_list<int>{GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_UP, GLFW_KEY_DOWN});
@@ -264,7 +306,7 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
 
     // Set the camera oirigin position and target.
     _pipeline->camera()->setTarget(glm::vec3{0.0f, 1.0f, 0.0f});
-    //_pipeline->camera()->setTarget(glm::vec3{1.0f, 0.0f, 2.0f});
+    _pipeline->camera()->setTarget(glm::vec3{0.0f, 1.0f, 2.0f});
 
     printf("%s\n", glGetString(GL_VERSION));
 }
@@ -317,7 +359,7 @@ void App::update(float dt)
     static const float cameraRadius = 10.0f;
     float camX = sin(_cameraAngle) * cameraRadius;
     float camZ = cos(_cameraAngle) * cameraRadius;
-    _pipeline->camera()->setPosition(glm::vec3{camX, _camY, camZ});
+    _pipeline->camera()->setPosition(_pipeline->camera()->target() + glm::vec3{camX, _camY, camZ});
     _hand.update(dt);
     _cubemapHDR->bind(GL_TEXTURE0);
     _pipeline->setTime(time());
