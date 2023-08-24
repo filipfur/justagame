@@ -2,7 +2,8 @@
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
-layout (location = 2) in vec3 aColor;
+layout (location = 2) in vec2 aTexCoords;
+layout (location = 3) in mat4 aInstance;
 
 layout (std140) uniform CameraUBO
 {
@@ -17,15 +18,14 @@ uniform float u_time;
 out vec2 texCoord;
 out vec3 normal;
 out vec3 fragPos;
-out vec3 eyePos;
-out vec3 color;
+out float instanceId;
 
 void main()
 {
-    eyePos = u_eye_pos;
-    color = aColor;
-    mat3 normalMatrix = transpose(inverse(mat3(u_model)));
-    normal = normalMatrix * aNormal;
-    fragPos = vec3(u_model * vec4(aPos, 1.0));
+    texCoord = aTexCoords;// - vec2(0.0, 1.0 / 6.0);
+    mat3 normalMatrix = transpose(inverse(mat3(aInstance)));
+    instanceId = float(gl_InstanceID);
+    normal = normalize(normalMatrix * aNormal);
+    fragPos = vec3(aInstance * vec4(aPos, 1.0));
     gl_Position = u_projection * u_view * vec4(fragPos, 1.0);
 }

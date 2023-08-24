@@ -4,6 +4,7 @@
 
 #include "glcube.h"
 #include "cardobject.h"
+#include "glinstancedobject.h"
 
 App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Application::Mode::MULTISAMPLED_4X, false}
 {
@@ -158,6 +159,11 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     _pipeline->attach(_skybox.get());
     _skybox->stage();
 
+    auto tile = std::make_shared<lithium::InstancedObject<glm::mat4>>(AssetFactory::getMeshes()->tile, std::vector<lithium::Object::TexturePointer>{});
+    tile->setGroupId(Pipeline::TILES);
+    _objects.push_back(tile);
+    _pipeline->attach(tile.get());
+    tile->stage();
 
     input()->setCursorListener([this](float x, float y) {
         static int lastId{-1};
@@ -236,14 +242,17 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
 
     const int numRows = 8;
     const int numCols = 21;
+    const float rowh = numRows / 2.0f;
+    const float colh = numCols / 2.0f;
 
-    int tileId;
+    int tileId{0};
 
-    for(int z{0}; z < numRows; ++z)
+    for(float z{-rowh}; z < rowh; ++z)
     {
-        int zMod = z % 2;
-        for(int x{0}; x < numCols; ++x)
+        int zMod = static_cast<int>(z + rowh) % 2;
+        for(float x{-colh}; x < colh; ++x)
         {
+            int xMod = static_cast<int>(x + colh) % 2;
             /*triVertices.insert(triVertices.end(), {
                 triSide * x * 0.5f, 0.0f, triHeight * z + ((x % 2 == zMod) ? -triHeight : triHeight) * 0.5f,
                 0.0f, 1.0f, 0.0f, // normal
@@ -251,10 +260,10 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
             });*/
             glm::vec3 color{rand() % 256 / 255.0f, rand() % 256 / 255.0f, rand() % 256 / 255.0f};
             color = glm::vec3{static_cast<float>(tileId) / 256.0f};
-            color = glm::vec3{0.5f, 0.0f, 0.0f};
+            //color = glm::vec3{0.5f, 0.0f, 0.0f};
             ++tileId;
             glm::vec3 c = glm::vec3{triSide * 0.5f * x, 0.0f, triHeight * z};
-            if(x % 2 == zMod)
+            /*if(x % 2 == zMod)
             {
                 triVertices.insert(triVertices.end(), {
                     c.x, c.y, c.z - triHeight * 0.4f,   0.0f, 1.0f, 0.0f,   color.r, color.g, color.b,
@@ -269,11 +278,25 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
                     c.x, c.y, c.z + triHeight * 0.4f,   0.0f, 1.0f, 0.0f,   color.r, color.g, color.b,
                     c.x + triSide * 0.4f, c.y, c.z - triHeight * 0.4f,  0.0f, 1.0f, 0.0f,   color.r, color.g, color.b
                 });
+            }*/
+            glm::mat4 model = glm::translate(glm::mat4{1.0f}, c);
+            if(xMod != zMod)
+            {
+                model = glm::rotate(model, glm::radians(180.0f), glm::vec3{0.0f, 1.0f, 0.0f});
             }
+            tile->addInstance(model);
         }
     }
 
-    auto triMesh = std::make_shared<lithium::Mesh>(std::vector<lithium::VertexArrayBuffer::AttributeType>{
+    tile->allocateBufferData();
+    tile->linkBuffer({
+        lithium::AttributePointer<GL_FLOAT>{0, 4, sizeof(glm::mat4), (void*)0},
+        lithium::AttributePointer<GL_FLOAT>{1, 4, sizeof(glm::mat4), (void*)(sizeof(glm::vec4))},
+        lithium::AttributePointer<GL_FLOAT>{2, 4, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4))},
+        lithium::AttributePointer<GL_FLOAT>{3, 4, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4))},
+    });
+
+    /*auto triMesh = std::make_shared<lithium::Mesh>(std::vector<lithium::VertexArrayBuffer::AttributeType>{
         lithium::VertexArrayBuffer::AttributeType::VEC3,
         lithium::VertexArrayBuffer::AttributeType::VEC3,
         lithium::VertexArrayBuffer::AttributeType::VEC3
@@ -286,7 +309,7 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     triObject->setGroupId(Pipeline::TILES);
     _objects.push_back(triObject);
     _pipeline->attach(triObject.get());
-    triObject->stage();
+    triObject->stage();*/
 
     // Key cache for rotating the camera left and right.
     _keyCache = std::make_shared<lithium::Input::KeyCache>(

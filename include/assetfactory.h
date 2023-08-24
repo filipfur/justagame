@@ -16,6 +16,7 @@ public:
         std::shared_ptr<lithium::Mesh> card;
         std::shared_ptr<lithium::Mesh> screen;
         std::shared_ptr<lithium::Mesh> sphere;
+        std::shared_ptr<lithium::Mesh> tile;
     } _meshes;
 
     struct Textures

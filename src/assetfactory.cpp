@@ -29,6 +29,7 @@ void AssetFactory::loadMeshes()
     instance._meshes.screen.reset(lithium::Plane2D());
     instance._meshes.card = lithium::tinyobjloader_load("assets/card/card.obj", objectAttributes);
     instance._meshes.sphere = lithium::tinyobjloader_load("assets/sphere.obj", objectAttributes);
+    instance._meshes.tile = lithium::tinyobjloader_load("assets/tile/tile.obj", objectAttributes);
 }
 
 void loadTextureMaps(std::vector<std::shared_ptr<lithium::Texture<unsigned char>>>& textureMaps, const std::string& path)
