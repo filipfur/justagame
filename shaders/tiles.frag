@@ -10,10 +10,11 @@ out vec4 fragColor;
 in vec2 texCoord;
 in vec3 normal;
 in vec3 fragPos;
+in vec3 color;
 
 void main()
 {
-    vec4 color = texture(u_texture_0, texCoord) * u_color;
-    fragColor = vec4(pow(color.rgb, vec3(1.0/2.2)), color.a);
+    vec4 c = vec4(color, 1.0) * u_color;
+    fragColor = vec4(pow(c.rgb, vec3(1.0/2.2)), c.a);
     //fragColor = vec4(texCoord, 0.0, 1.0);
 }

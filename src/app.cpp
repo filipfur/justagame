@@ -234,27 +234,52 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
         0, 1, 2
     };*/
 
-    const int numRows = 9;
-    const int numCols = 23;
+    const int numRows = 8;
+    const int numCols = 21;
+
+    int tileId;
 
     for(int z{0}; z < numRows; ++z)
     {
         int zMod = z % 2;
-        for(int x{0}; x < numCols + 2; ++x)
+        for(int x{0}; x < numCols; ++x)
         {
-            triVertices.insert(triVertices.end(), {
-                triSide * x * 0.5f, 0.0f, triHeight * z + ((x % 2 == zMod) ? -triHeight : triHeight) * 0.5f,   0.0f, 1.0f, 0.0f,   0.0f, 1.0f
-            });
+            /*triVertices.insert(triVertices.end(), {
+                triSide * x * 0.5f, 0.0f, triHeight * z + ((x % 2 == zMod) ? -triHeight : triHeight) * 0.5f,
+                0.0f, 1.0f, 0.0f, // normal
+                rand() % 256 / 255.0f, rand() % 256 / 255.0f, rand() % 256 / 255.0f
+            });*/
+            glm::vec3 color{rand() % 256 / 255.0f, rand() % 256 / 255.0f, rand() % 256 / 255.0f};
+            color = glm::vec3{static_cast<float>(tileId) / 256.0f};
+            color = glm::vec3{0.5f, 0.0f, 0.0f};
+            ++tileId;
+            glm::vec3 c = glm::vec3{triSide * 0.5f * x, 0.0f, triHeight * z};
+            if(x % 2 == zMod)
+            {
+                triVertices.insert(triVertices.end(), {
+                    c.x, c.y, c.z - triHeight * 0.4f,   0.0f, 1.0f, 0.0f,   color.r, color.g, color.b,
+                    c.x - triSide * 0.4f, c.y, c.z + triHeight * 0.4f,  0.0f, 1.0f, 0.0f,   color.r, color.g, color.b,
+                    c.x + triSide * 0.4f, c.y, c.z + triHeight * 0.4f,  0.0f, 1.0f, 0.0f,   color.r, color.g, color.b
+                });
+            }
+            else
+            {
+                triVertices.insert(triVertices.end(), {
+                    c.x - triSide * 0.4f, c.y, c.z - triHeight * 0.4f,  0.0f, 1.0f, 0.0f,   color.r, color.g, color.b,
+                    c.x, c.y, c.z + triHeight * 0.4f,   0.0f, 1.0f, 0.0f,   color.r, color.g, color.b,
+                    c.x + triSide * 0.4f, c.y, c.z - triHeight * 0.4f,  0.0f, 1.0f, 0.0f,   color.r, color.g, color.b
+                });
+            }
         }
     }
 
     auto triMesh = std::make_shared<lithium::Mesh>(std::vector<lithium::VertexArrayBuffer::AttributeType>{
         lithium::VertexArrayBuffer::AttributeType::VEC3,
         lithium::VertexArrayBuffer::AttributeType::VEC3,
-        lithium::VertexArrayBuffer::AttributeType::VEC2
+        lithium::VertexArrayBuffer::AttributeType::VEC3
     }, triVertices);
 
-    triMesh->setDrawMode(GL_TRIANGLE_STRIP);
+    //triMesh->setDrawMode(GL_TRIANGLE_STRIP);
 
     auto triObject = std::make_shared<lithium::Object>(triMesh, std::vector<lithium::Object::TexturePointer>{});
     triObject->setPosition(glm::vec3{-numCols * triSide * 0.5f * 0.5f, 0.0f, -numRows * triHeight * 0.5f});
@@ -306,7 +331,7 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
 
     // Set the camera oirigin position and target.
     _pipeline->camera()->setTarget(glm::vec3{0.0f, 1.0f, 0.0f});
-    _pipeline->camera()->setTarget(glm::vec3{0.0f, 1.0f, 2.0f});
+    _pipeline->camera()->setTarget(glm::vec3{0.0f, 1.0f, 2.5f});
 
     printf("%s\n", glGetString(GL_VERSION));
 }
@@ -356,7 +381,7 @@ void App::update(float dt)
     {
         _camY -= 5.0f * dt;
     }
-    static const float cameraRadius = 10.0f;
+    static const float cameraRadius = 6.0f;
     float camX = sin(_cameraAngle) * cameraRadius;
     float camZ = cos(_cameraAngle) * cameraRadius;
     _pipeline->camera()->setPosition(_pipeline->camera()->target() + glm::vec3{camX, _camY, camZ});

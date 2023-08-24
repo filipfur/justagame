@@ -3,7 +3,7 @@
 std::shared_ptr<lithium::Mesh> CardObject::sharedMesh{nullptr};
 std::vector<lithium::Object::TexturePointer> CardObject::sharedTextures{};
 
-static const float yStart{-0.6f};
+static const float yStart{-0.7f};
 
 CardObject::CardObject(uint32_t id, uint32_t type) : Object{sharedMesh, sharedTextures}, _id(id), _type(type)
 {

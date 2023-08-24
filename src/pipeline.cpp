@@ -18,7 +18,7 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
     _blockShader = std::make_shared<lithium::ShaderProgram>("shaders/object.vert", "shaders/object.frag");
     _blockShader->setUniform("u_texture_0", 0);
 
-    _tileShader = std::make_shared<lithium::ShaderProgram>("shaders/object.vert", "shaders/object.frag");
+    _tileShader = std::make_shared<lithium::ShaderProgram>("shaders/tiles.vert", "shaders/tiles.frag");
     _tileShader->setUniform("u_texture_0", 0);
 
     _cardShader = std::make_shared<lithium::ShaderProgram>("shaders/card.vert", "shaders/object.frag");
@@ -154,7 +154,7 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
         _cardGroup->render(_cardShader.get());
 
         glLineWidth(4.0f);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         _tileShader->setUniform("u_time", 0.0f);
         _tileGroup->render(_tileShader.get());
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
