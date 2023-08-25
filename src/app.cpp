@@ -30,7 +30,7 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     // Create and add a cube to the render pipeline, and stage it for rendering.
     for(int i{0}; i < 14; ++ i)
     {
-        auto card = std::make_shared<CardObject>(i, i + 1);
+        auto card = std::make_shared<CardObject>(i + 100, i + 1);
         card->setPosition(glm::vec3{3.0f, 0.005f * i, 3.0f});
         card->setRotation(glm::vec3{90.0f, 0.0f, 0.0f});
         card->setGroupId(Pipeline::CARD);
@@ -164,15 +164,28 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     _objects.push_back(tile);
     _pipeline->attach(tile.get());
     tile->stage();
+    tile->setShaderCallback([this](lithium::Renderable* r, lithium::ShaderProgram* sp){
+        sp->setUniform("u_hovered_id", _hoveredTileId);
+    });
 
     input()->setCursorListener([this](float x, float y) {
         static int lastId{-1};
+        x = x / windowWidth() * defaultFrameBufferResolution().x;
+        y = y / windowHeight() * defaultFrameBufferResolution().y;
         int id = objectIdAt(static_cast<int>(x), static_cast<int>(y));
         if(id != lastId)
         {
-            std::cout << "id=" << id << ", x=" << x << ", y=" << y << std::endl;
+            if(id > 99)
+            {
+                _hand.hover(id);
+                _hoveredTileId = 0;
+            }
+            else
+            {
+                _hand.hover(0);
+                _hoveredTileId = id;
+            }
             lastId = id;
-            _hand.hover(id);
         }
         return true;
     });
@@ -242,8 +255,8 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
 
     const int numRows = 8;
     const int numCols = 21;
-    const float rowh = numRows / 2.0f;
-    const float colh = numCols / 2.0f;
+    const float rowh = numRows / 2;
+    const float colh = numCols / 2;
 
     int tileId{0};
 
@@ -251,7 +264,7 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     {
         int zMod = static_cast<int>(z + rowh) % 2;
         float ch = colh - glm::abs((z + 1) - ((z+1) > 0 ? 1 : 0)) * 3;
-        for(float x{-ch}; x < ch; ++x)
+        for(float x{-ch}; x <= ch; ++x)
         {
             int xMod = static_cast<int>(x + colh) % 2;
             /*triVertices.insert(triVertices.end(), {
@@ -264,6 +277,7 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
             //color = glm::vec3{0.5f, 0.0f, 0.0f};
             ++tileId;
             glm::vec3 c = glm::vec3{triSide * 0.5f * x, 0.0f, triHeight * z};
+            std::cout << ' ' << c.x;
             /*if(x % 2 == zMod)
             {
                 triVertices.insert(triVertices.end(), {
@@ -285,9 +299,10 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
             {
                 model = glm::rotate(model, glm::radians(180.0f), glm::vec3{0.0f, 1.0f, 0.0f});
             }
-            model = glm::scale(model, glm::vec3{0.94f});
+            //model = glm::scale(model, glm::vec3{0.94f});
             tile->addInstance(model);
         }
+        std::cout << std::endl;
     }
 
     tile->allocateBufferData();
@@ -326,6 +341,12 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
 
     input()->addPressedCallback(GLFW_KEY_KP_ADD, [this](int key, int mods) {
         _lod += 0.25f;
+        return true;
+    });
+
+    input()->addPressedCallback(GLFW_MOUSE_BUTTON_LEFT, [this](int key, int mods) {
+        auto mp = input()->mousePosition();
+        std::cout << "mousePos: " << mp.x << ", " << mp.y << std::endl;
         return true;
     });
 
@@ -374,6 +395,7 @@ int App::objectIdAt(int x, int y)
     auto fbo = _pipeline->offscreenBuffer();
     fbo->bind();
     static GLubyte pixel[3];
+    // if necessary we can divide ids in r g b and get one byte per object type for eg.
     fbo->readPixel(x, fbo->resolution().y - y, GL_RED, GL_UNSIGNED_BYTE, pixel);
     fbo->unbind();
     return static_cast<int>(pixel[0]);

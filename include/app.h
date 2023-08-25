@@ -26,7 +26,6 @@ protected:
 private:
     int objectIdAt(int x, int y);
 
-
     Hand _hand;
     std::vector<std::shared_ptr<CardObject>> _stack;
     std::shared_ptr<Pipeline> _pipeline{nullptr};
@@ -38,6 +37,7 @@ private:
     float _camY{4.0f};
     const float _cameraRadius{4.0f};
     const glm::vec3 _cameraTarget{0.0f, 1.0f, 2.5f};
+    int _hoveredTileId{0};
     float _lod{0.0f};
     std::shared_ptr<lithium::Input::KeyCache> _keyCache;
 };

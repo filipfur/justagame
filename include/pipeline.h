@@ -52,6 +52,7 @@ private:
     std::shared_ptr<lithium::ShaderProgram> _pbrShader{nullptr};
     std::shared_ptr<lithium::ShaderProgram> _pbrPolyHavenShader{nullptr};
     std::shared_ptr<lithium::ShaderProgram> _pbrBaseColorShader{nullptr};
+    std::shared_ptr<lithium::ShaderProgram> _offscreenTileShader{nullptr};
     std::shared_ptr<lithium::ShaderProgram> _tileShader{nullptr};
     std::shared_ptr<lithium::ShaderProgram> _cardShader{nullptr};
     std::shared_ptr<lithium::SimpleCamera> _camera{nullptr};

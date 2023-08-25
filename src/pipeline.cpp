@@ -21,6 +21,8 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
     _tileShader = std::make_shared<lithium::ShaderProgram>("shaders/tiles.vert", "shaders/tiles.frag");
     _tileShader->setUniform("u_texture_0", 0);
 
+    _offscreenTileShader = std::make_shared<lithium::ShaderProgram>("shaders/tiles.vert", "shaders/offscreeninst.frag");
+
     _cardShader = std::make_shared<lithium::ShaderProgram>("shaders/card.vert", "shaders/object.frag");
     _cardShader->setUniform("u_texture_0", 0);
 
@@ -82,6 +84,7 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
         _pbrPolyHavenShader.get(),
         _pbrBaseColorShader.get(),
         _tileShader.get(),
+        _offscreenTileShader.get(),
         _offscreenShader.get(),
         _offCardShader.get()});
 
@@ -129,6 +132,7 @@ Pipeline::Pipeline(const glm::ivec2& resolution) : lithium::RenderPipeline{resol
         clearColor(0.0f, 0.0f, 0.0f, 0.0f);
         clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         //_mainGroup->render(_blockShader.get());
+        _tileGroup->render(_offscreenTileShader.get());
         _cardGroup->render(_offCardShader.get());
     }));
 

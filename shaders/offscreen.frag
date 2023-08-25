@@ -4,7 +4,7 @@ uniform int u_id;
 
 out vec4 fragColor;
 
-const float f = 1.0 / 255.0;
+const float f = 1.0 / 256.0;
 
 void main()
 {
