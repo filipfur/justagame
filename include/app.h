@@ -35,7 +35,9 @@ private:
     std::shared_ptr<lithium::Object> _background;
     std::shared_ptr<lithium::CubemapHDR> _cubemapHDR;
     float _cameraAngle{0.0f};
-    float _camY{6.0f};
+    float _camY{4.0f};
+    const float _cameraRadius{4.0f};
+    const glm::vec3 _cameraTarget{0.0f, 1.0f, 2.5f};
     float _lod{0.0f};
     std::shared_ptr<lithium::Input::KeyCache> _keyCache;
 };

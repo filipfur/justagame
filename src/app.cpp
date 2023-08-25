@@ -31,7 +31,7 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     for(int i{0}; i < 14; ++ i)
     {
         auto card = std::make_shared<CardObject>(i, i + 1);
-        card->setPosition(glm::vec3{8.0f, 0.005f * i, 0.0f});
+        card->setPosition(glm::vec3{3.0f, 0.005f * i, 3.0f});
         card->setRotation(glm::vec3{90.0f, 0.0f, 0.0f});
         card->setGroupId(Pipeline::CARD);
         _pipeline->attach(card.get());
@@ -250,7 +250,8 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
     for(float z{-rowh}; z < rowh; ++z)
     {
         int zMod = static_cast<int>(z + rowh) % 2;
-        for(float x{-colh}; x < colh; ++x)
+        float ch = colh - glm::abs((z + 1) - ((z+1) > 0 ? 1 : 0)) * 3;
+        for(float x{-ch}; x < ch; ++x)
         {
             int xMod = static_cast<int>(x + colh) % 2;
             /*triVertices.insert(triVertices.end(), {
@@ -280,10 +281,11 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
                 });
             }*/
             glm::mat4 model = glm::translate(glm::mat4{1.0f}, c);
-            if(xMod != zMod)
+            if(xMod == zMod)
             {
                 model = glm::rotate(model, glm::radians(180.0f), glm::vec3{0.0f, 1.0f, 0.0f});
             }
+            model = glm::scale(model, glm::vec3{0.94f});
             tile->addInstance(model);
         }
     }
@@ -354,7 +356,7 @@ App::App() : Application{"lithium-lab", glm::ivec2{1440, 800}, lithium::Applicat
 
     // Set the camera oirigin position and target.
     _pipeline->camera()->setTarget(glm::vec3{0.0f, 1.0f, 0.0f});
-    _pipeline->camera()->setTarget(glm::vec3{0.0f, 1.0f, 2.5f});
+    _pipeline->camera()->setTarget(_cameraTarget);
 
     printf("%s\n", glGetString(GL_VERSION));
 }
@@ -404,9 +406,8 @@ void App::update(float dt)
     {
         _camY -= 5.0f * dt;
     }
-    static const float cameraRadius = 6.0f;
-    float camX = sin(_cameraAngle) * cameraRadius;
-    float camZ = cos(_cameraAngle) * cameraRadius;
+    float camX = sin(_cameraAngle) * _cameraRadius;
+    float camZ = cos(_cameraAngle) * _cameraRadius;
     _pipeline->camera()->setPosition(_pipeline->camera()->target() + glm::vec3{camX, _camY, camZ});
     _hand.update(dt);
     _cubemapHDR->bind(GL_TEXTURE0);
